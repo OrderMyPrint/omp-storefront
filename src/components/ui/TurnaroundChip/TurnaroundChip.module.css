@@ -1,0 +1,10 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--omp-space-2xs);
+  align-self: flex-start;
+  padding: var(--omp-space-2xs) var(--omp-space-xs);
+  border-radius: var(--omp-radius-sm);
+  background: var(--omp-color-bg-subtle);
+  color: var(--omp-color-text-secondary);
+}

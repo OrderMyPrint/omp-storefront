@@ -1,0 +1,255 @@
+.header {
+  position: relative;
+  z-index: 20;
+  background: var(--omp-color-bg-surface);
+}
+
+/* Utility bar */
+.utilityBar {
+  background: var(--omp-color-bg-brand);
+  color: var(--omp-color-text-inverse);
+}
+
+.utilityInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+}
+
+.phone {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--omp-space-xs);
+}
+
+.utilityLinks {
+  display: flex;
+  gap: var(--omp-space-lg);
+}
+
+.utilityLinks a:hover {
+  text-decoration: underline;
+}
+
+/* Main row */
+.mainRow {
+  display: flex;
+  align-items: center;
+  gap: var(--omp-space-xl);
+  padding-block: var(--omp-space-md);
+}
+
+.searchForm {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 var(--omp-space-md);
+  gap: var(--omp-space-xs);
+  border: 1px solid var(--omp-color-border-default);
+  border-radius: var(--omp-radius-full);
+  background: var(--omp-color-bg-subtle);
+}
+
+.searchForm:focus-within {
+  border-color: var(--omp-color-border-focus);
+  box-shadow: 0 0 0 1px var(--omp-color-border-focus);
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  color: var(--omp-color-icon-muted);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--omp-color-text-body);
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--omp-color-text-disabled);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--omp-space-xs);
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--omp-space-xs);
+  height: 44px;
+  padding: 0 var(--omp-space-sm);
+  border-radius: var(--omp-radius-md);
+  color: var(--omp-color-text-primary);
+}
+
+.action:hover,
+.cart:hover {
+  background: var(--omp-color-bg-subtle);
+}
+
+.cart {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--omp-radius-md);
+  color: var(--omp-color-icon-default);
+}
+
+/* Category navigation */
+.categoryNav {
+  border-top: 1px solid var(--omp-color-border-default);
+}
+
+.categoryInner {
+  display: flex;
+  align-items: center;
+  gap: var(--omp-space-xl);
+  height: 48px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.allProducts {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--omp-space-2xs);
+  color: var(--omp-color-text-primary);
+  white-space: nowrap;
+}
+
+.categoryLink {
+  color: var(--omp-color-text-body);
+  white-space: nowrap;
+}
+
+.categoryLink:hover,
+.allProducts:hover {
+  color: var(--omp-color-text-accent);
+}
+
+.quoteLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--omp-space-xs);
+  margin-left: auto;
+  color: var(--omp-color-text-accent);
+  white-space: nowrap;
+}
+
+.spectrumRule {
+  height: 3px;
+  background: var(--omp-gradient-spectrum-key);
+}
+
+/* Mobile menu (hidden on tablet and desktop) */
+.menuButton {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--omp-radius-md);
+  background: transparent;
+  color: var(--omp-color-icon-default);
+}
+
+.drawerScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(11 27 51 / 0.55);
+}
+
+.drawer {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 50;
+  width: min(320px, 85vw);
+  padding: var(--omp-space-lg) var(--omp-space-md);
+  overflow-y: auto;
+  background: var(--omp-color-bg-surface);
+  box-shadow: var(--omp-elevation-3);
+}
+
+.drawer[hidden] {
+  display: none;
+}
+
+.drawerHeading {
+  margin: var(--omp-space-md) 0 var(--omp-space-xs);
+  color: var(--omp-color-text-accent);
+}
+
+.drawerList a {
+  display: block;
+  padding: var(--omp-space-sm) 0;
+  border-bottom: 1px solid var(--omp-color-border-default);
+  color: var(--omp-color-text-primary);
+}
+
+.drawerPhone {
+  display: block;
+  margin-top: var(--omp-space-lg);
+  color: var(--omp-color-text-link);
+}
+
+/* Tablet */
+@media (max-width: 1199px) {
+  .utilityLinks {
+    gap: var(--omp-space-md);
+  }
+
+  .mainRow {
+    gap: var(--omp-space-md);
+  }
+}
+
+/* Mobile: Figma "Header / Mobile" */
+@media (max-width: 767px) {
+  .utilityBar,
+  .categoryNav,
+  .hideMobile {
+    display: none;
+  }
+
+  .menuButton {
+    display: inline-flex;
+  }
+
+  .mainRow {
+    gap: var(--omp-space-xs);
+    padding-block: var(--omp-space-xs);
+  }
+
+  .logo {
+    width: 84px;
+  }
+
+  .search {
+    order: 4;
+    flex-basis: 100%;
+  }
+
+  .mainRow {
+    flex-wrap: wrap;
+  }
+
+  .actions {
+    margin-left: auto;
+  }
+}

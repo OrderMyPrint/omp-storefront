@@ -1,0 +1,21 @@
+.logo {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.logo img {
+  width: 100%;
+  height: auto;
+}
+
+.header {
+  width: 91px;
+}
+
+.mobile {
+  width: 84px;
+}
+
+.footer {
+  width: 100px;
+}

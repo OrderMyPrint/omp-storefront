@@ -1,0 +1,82 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ProductCard } from "@/components/catalogue/ProductCard/ProductCard";
+import { SectionHeading } from "@/components/ui/SectionHeading/SectionHeading";
+import { getProduct, popularProductSlugs, type Product } from "@/data/catalogue";
+import styles from "./PopularProducts.module.css";
+
+const popular = popularProductSlugs
+  .map((slug) => getProduct(slug))
+  .filter((product): product is Product => Boolean(product));
+
+/** Figma SF-HOME-01 · Popular products — horizontal carousel with arrow controls. */
+export function PopularProducts() {
+  const trackRef = useRef<HTMLUListElement>(null);
+  const [canScroll, setCanScroll] = useState({ back: false, forward: true });
+
+  const updateButtons = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    setCanScroll({
+      back: track.scrollLeft > 4,
+      forward: track.scrollLeft + track.clientWidth < track.scrollWidth - 4,
+    });
+  }, []);
+
+  useEffect(() => {
+    updateButtons();
+    window.addEventListener("resize", updateButtons);
+    return () => window.removeEventListener("resize", updateButtons);
+  }, [updateButtons]);
+
+  const scrollByCard = (direction: 1 | -1) => {
+    const track = trackRef.current;
+    const card = track?.firstElementChild as HTMLElement | null;
+    if (!track || !card) return;
+    track.scrollBy({ left: direction * (card.offsetWidth + 24), behavior: "smooth" });
+  };
+
+  return (
+    <section className={styles.band} aria-labelledby="popular-title">
+      <div className={`container ${styles.section}`}>
+        <div className={styles.head}>
+          <SectionHeading
+            id="popular-title"
+            overline="Popular now"
+            title="Our most-ordered print products"
+            lead="The business essentials our customers reorder most — configure any of them in minutes."
+          />
+          <div className={styles.controls}>
+            <button
+              type="button"
+              className={styles.arrow}
+              onClick={() => scrollByCard(-1)}
+              disabled={!canScroll.back}
+              aria-label="Previous products"
+            >
+              <ChevronLeft size={24} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className={`${styles.arrow} ${styles.arrowPrimary}`}
+              onClick={() => scrollByCard(1)}
+              disabled={!canScroll.forward}
+              aria-label="Next products"
+            >
+              <ChevronRight size={24} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+        <ul ref={trackRef} className={styles.track} onScroll={updateButtons}>
+          {popular.map((product) => (
+            <li key={product.slug} className={styles.slide}>
+              <ProductCard product={product} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}

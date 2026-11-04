@@ -1,0 +1,76 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--omp-color-border-default);
+  border-radius: var(--omp-radius-lg);
+  background: var(--omp-color-bg-surface);
+  transition: box-shadow 150ms ease;
+}
+
+.card:hover {
+  box-shadow: var(--omp-elevation-2);
+}
+
+.media {
+  position: relative;
+  aspect-ratio: 298 / 225;
+  background: var(--omp-color-bg-subtle);
+}
+
+.media img {
+  object-fit: cover;
+}
+
+.rule {
+  height: 3px;
+  background: var(--omp-gradient-spectrum-key);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--omp-space-xs);
+  padding: var(--omp-space-md);
+}
+
+.category {
+  color: var(--omp-color-text-accent);
+}
+
+.name {
+  color: var(--omp-color-text-primary);
+}
+
+.name a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.card {
+  position: relative;
+}
+
+.summary {
+  flex: 1;
+  color: var(--omp-color-text-body);
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--omp-space-xs);
+  color: var(--omp-color-text-primary);
+}
+
+.price span:first-child {
+  color: var(--omp-color-text-secondary);
+}
+
+.cta {
+  position: relative;
+  z-index: 1;
+  margin-top: var(--omp-space-xs);
+}

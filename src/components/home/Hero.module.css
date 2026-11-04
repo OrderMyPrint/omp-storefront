@@ -1,0 +1,114 @@
+.inner {
+  display: flex;
+  align-items: center;
+  gap: var(--omp-space-3xl);
+  padding-block: 80px var(--omp-space-3xl);
+}
+
+.copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--omp-space-lg);
+}
+
+.overline {
+  color: var(--omp-color-text-accent);
+}
+
+.title {
+  color: var(--omp-color-text-primary);
+}
+
+.lead {
+  color: var(--omp-color-text-body);
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--omp-space-md);
+}
+
+.note {
+  color: var(--omp-color-text-secondary);
+}
+
+.visual {
+  position: relative;
+  flex: 0 0 600px;
+}
+
+.photo {
+  position: relative;
+  height: 520px;
+  overflow: hidden;
+  background: var(--omp-color-bg-subtle);
+}
+
+.photo img {
+  object-fit: cover;
+}
+
+.priceCard {
+  position: absolute;
+  top: 400px;
+  left: -32px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-2xs);
+  width: 240px;
+  padding: var(--omp-space-md);
+  border-radius: var(--omp-radius-lg);
+  background: var(--omp-color-bg-surface);
+  color: var(--omp-color-text-secondary);
+  box-shadow: var(--omp-elevation-3);
+}
+
+.price {
+  color: var(--omp-color-text-primary);
+}
+
+@media (max-width: 1199px) {
+  .inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--omp-space-2xl);
+    padding-block: var(--omp-space-3xl) var(--omp-space-2xl);
+  }
+
+  .visual {
+    flex-basis: auto;
+  }
+
+  .photo {
+    height: 440px;
+    border-radius: var(--omp-radius-xl);
+  }
+
+  .priceCard {
+    top: auto;
+    bottom: var(--omp-space-md);
+    left: var(--omp-space-md);
+  }
+}
+
+@media (max-width: 767px) {
+  .inner {
+    padding-block: var(--omp-space-xl);
+  }
+
+  .photo {
+    height: 280px;
+  }
+
+  .priceCard {
+    width: 200px;
+    padding: var(--omp-space-sm);
+  }
+
+  .ctas > * {
+    flex: 1 1 100%;
+  }
+}

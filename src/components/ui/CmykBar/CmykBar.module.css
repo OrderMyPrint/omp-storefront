@@ -1,0 +1,24 @@
+.bar {
+  display: flex;
+  height: 4px;
+}
+
+.bar span {
+  flex: 1;
+}
+
+.c {
+  background: var(--omp-color-cmyk-cyan);
+}
+
+.m {
+  background: var(--omp-color-cmyk-magenta);
+}
+
+.y {
+  background: var(--omp-color-cmyk-yellow);
+}
+
+.k {
+  background: var(--omp-color-cmyk-key);
+}
