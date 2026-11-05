@@ -1,0 +1,23 @@
+.band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--omp-space-lg);
+  padding: var(--omp-space-lg) var(--omp-space-lg);
+  border-radius: var(--omp-radius-xl);
+  background: var(--omp-color-bg-brand);
+  color: var(--omp-color-text-inverse);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-2xs);
+}
+
+@media (max-width: 767px) {
+  .band {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run lint && npm run typecheck && npm test"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
@@ -16,17 +21,21 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "^15.5.29",
     "prettier": "^3.3.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.1.0"
   },
   "overrides": {
     "postcss": "8.5.32",
-    "sharp": "0.35.5"
+    "sharp": "0.35.5",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.4"
+    }
   },
   "engines": {
     "node": ">=20.9"

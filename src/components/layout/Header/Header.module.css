@@ -109,6 +109,20 @@
   color: var(--omp-color-icon-default);
 }
 
+.badge {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: var(--omp-radius-full);
+  background: var(--omp-color-action-accent);
+  color: var(--omp-color-text-inverse);
+  font: 600 11px / 18px var(--omp-font-body);
+  text-align: center;
+}
+
 /* Category navigation */
 .categoryNav {
   border-top: 1px solid var(--omp-color-border-default);

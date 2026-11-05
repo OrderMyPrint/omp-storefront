@@ -1,0 +1,76 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-md);
+  padding: var(--omp-space-xl);
+  border: 1px solid var(--omp-color-border-default);
+  border-radius: var(--omp-radius-xl);
+  background: var(--omp-color-bg-surface);
+  box-shadow: var(--omp-elevation-1);
+  color: var(--omp-color-text-secondary);
+}
+
+.card h2,
+.card h3 {
+  color: var(--omp-color-text-primary);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--omp-space-md);
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 1.6fr auto;
+  align-items: end;
+  gap: var(--omp-space-sm);
+  padding-bottom: var(--omp-space-md);
+  border-bottom: 1px solid var(--omp-color-border-default);
+}
+
+.remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--omp-color-border-default);
+  border-radius: var(--omp-radius-md);
+  background: var(--omp-color-bg-surface);
+  color: var(--omp-color-icon-default);
+}
+
+.remove:disabled {
+  color: var(--omp-color-text-disabled);
+  cursor: not-allowed;
+}
+
+.addItem {
+  align-self: flex-start;
+}
+
+.legal {
+  color: var(--omp-color-text-secondary);
+}
+
+.legal a {
+  color: var(--omp-color-text-link);
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .card {
+    padding: var(--omp-space-lg) var(--omp-space-md);
+  }
+
+  .row,
+  .item {
+    grid-template-columns: 1fr;
+  }
+
+  .remove {
+    justify-self: end;
+  }
+}

@@ -1,20 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Montserrat } from "next/font/google";
+import localFont from "next/font/local";
 import { Footer } from "@/components/layout/Footer/Footer";
 import { Header } from "@/components/layout/Header/Header";
 import { site } from "@/config/site";
 import "./globals.css";
 
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["600", "700"],
+// Self-hosted variable fonts (SIL OFL, see src/fonts) — no build-time network fetch.
+const montserrat = localFont({
+  src: "../fonts/montserrat-latin-var.woff2",
+  weight: "100 900",
   variable: "--font-montserrat",
   display: "swap",
 });
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const inter = localFont({
+  src: "../fonts/inter-latin-var.woff2",
+  weight: "100 900",
   variable: "--font-inter",
   display: "swap",
 });

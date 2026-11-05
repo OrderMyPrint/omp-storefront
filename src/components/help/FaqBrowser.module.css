@@ -1,0 +1,127 @@
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--omp-space-3xl);
+}
+
+.topics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-2xs);
+}
+
+.topic {
+  padding: var(--omp-space-xs) var(--omp-space-sm);
+  border: 0;
+  border-radius: var(--omp-radius-md);
+  background: none;
+  color: var(--omp-color-text-primary);
+  text-align: left;
+}
+
+.topic:hover {
+  background: var(--omp-color-bg-subtle);
+}
+
+.topicActive,
+.topicActive:hover {
+  background: var(--omp-color-bg-accent-subtle);
+  color: var(--omp-color-text-accent);
+}
+
+.main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--omp-space-lg);
+}
+
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-xs);
+  color: var(--omp-color-text-primary);
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: var(--omp-space-xs);
+  height: 44px;
+  padding: 0 var(--omp-space-sm);
+  border: 1px solid var(--omp-color-border-strong);
+  border-radius: var(--omp-radius-md);
+  background: var(--omp-color-bg-surface);
+  color: var(--omp-color-icon-muted);
+}
+
+.searchBox:focus-within {
+  border-color: var(--omp-color-border-focus);
+  box-shadow: 0 0 0 1px var(--omp-color-border-focus);
+}
+
+.searchBox input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--omp-color-text-body);
+  outline: none;
+}
+
+.groupTitle {
+  margin-bottom: var(--omp-space-xs);
+  color: var(--omp-color-text-primary);
+}
+
+.item {
+  border-bottom: 1px solid var(--omp-color-border-default);
+}
+
+.item summary {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--omp-space-md);
+  padding-block: var(--omp-space-md);
+  color: var(--omp-color-text-primary);
+  cursor: pointer;
+  list-style: none;
+}
+
+.item summary::-webkit-details-marker {
+  display: none;
+}
+
+.item summary::after {
+  content: "+";
+  color: var(--omp-color-action-accent);
+  font-size: 22px;
+  line-height: 24px;
+}
+
+.item[open] summary::after {
+  content: "−";
+}
+
+.item p {
+  padding-bottom: var(--omp-space-md);
+  color: var(--omp-color-text-body);
+}
+
+@media (max-width: 1199px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: var(--omp-space-lg);
+  }
+
+  .topics {
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .topic {
+    flex-shrink: 0;
+    border: 1px solid var(--omp-color-border-default);
+  }
+}

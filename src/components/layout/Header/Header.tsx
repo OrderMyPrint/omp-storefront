@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ChevronDown, LayoutGrid, MessageSquare, Phone, ShoppingCart, Truck, User } from "lucide-react";
+import { ChevronDown, LayoutGrid, MessageSquare, Phone, Truck, User } from "lucide-react";
+import { CartLink } from "./CartLink";
 import { Logo } from "@/components/ui/Logo/Logo";
 import { categories } from "@/data/catalogue";
 import { routes, site, utilityNav } from "@/config/site";
@@ -44,9 +45,7 @@ export function Header() {
             <User size={20} aria-hidden="true" />
             Sign in
           </Link>
-          <Link href={routes.cart} className={styles.cart} aria-label="Cart">
-            <ShoppingCart size={24} aria-hidden="true" />
-          </Link>
+          <CartLink />
         </div>
       </div>
 
@@ -58,7 +57,11 @@ export function Header() {
             <ChevronDown size={16} aria-hidden="true" />
           </Link>
           {categories.map((category) => (
-            <Link key={category.slug} href={routes.category(category.slug)} className={`t-label-m ${styles.categoryLink}`}>
+            <Link
+              key={category.slug}
+              href={routes.category(category.slug)}
+              className={`t-label-m ${styles.categoryLink}`}
+            >
               {category.name}
             </Link>
           ))}

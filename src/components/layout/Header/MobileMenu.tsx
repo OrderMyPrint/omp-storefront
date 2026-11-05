@@ -40,9 +40,7 @@ export function MobileMenu() {
         {open ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
       </button>
 
-      {open ? (
-        <div className={styles.drawerScrim} onClick={() => setOpen(false)} aria-hidden="true" />
-      ) : null}
+      {open ? <div className={styles.drawerScrim} onClick={() => setOpen(false)} aria-hidden="true" /> : null}
       <nav id={panelId} className={styles.drawer} data-open={open} aria-label="Menu" hidden={!open}>
         <p className={`t-overline ${styles.drawerHeading}`}>Shop</p>
         <ul className={styles.drawerList}>

@@ -1,0 +1,81 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--omp-space-md);
+  padding-block: 80px var(--omp-space-4xl);
+  text-align: center;
+}
+
+/* Three offset ink circles: a "misprint" that settles when motion is allowed. */
+.mark {
+  position: relative;
+  width: 112px;
+  height: 80px;
+}
+
+.mark span {
+  position: absolute;
+  top: 8px;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--omp-radius-full);
+  mix-blend-mode: multiply;
+}
+
+.c {
+  left: 0;
+  background: var(--omp-color-cmyk-cyan);
+  animation: drift 2s ease-in-out infinite alternate;
+}
+
+.m {
+  left: 24px;
+  background: var(--omp-color-cmyk-magenta);
+}
+
+.y {
+  left: 48px;
+  background: var(--omp-color-cmyk-yellow);
+  animation: drift 2s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes drift {
+  to {
+    transform: translateX(6px);
+  }
+}
+
+.code {
+  color: var(--omp-color-text-accent);
+}
+
+.title {
+  color: var(--omp-color-text-primary);
+}
+
+.lead {
+  max-width: 560px;
+  color: var(--omp-color-text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--omp-space-sm);
+  margin-top: var(--omp-space-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c,
+  .y {
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .wrap {
+    padding-block: var(--omp-space-2xl);
+  }
+}

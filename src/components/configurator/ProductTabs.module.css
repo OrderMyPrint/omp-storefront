@@ -1,0 +1,37 @@
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-lg);
+}
+
+.list {
+  display: flex;
+  gap: var(--omp-space-xl);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--omp-color-border-default);
+  scrollbar-width: none;
+}
+
+.tab {
+  flex-shrink: 0;
+  padding: var(--omp-space-sm) 0;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--omp-color-text-secondary);
+}
+
+.active {
+  border-bottom-color: var(--omp-color-action-accent);
+  color: var(--omp-color-text-primary);
+}
+
+.panel {
+  max-width: 880px;
+  color: var(--omp-color-text-body);
+}
+
+.panel a {
+  color: var(--omp-color-text-link);
+  text-decoration: underline;
+}

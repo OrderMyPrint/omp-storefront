@@ -1,0 +1,18 @@
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-sm);
+}
+
+.overline {
+  color: var(--omp-color-text-accent);
+}
+
+.title {
+  color: var(--omp-color-text-primary);
+}
+
+.lead {
+  max-width: 720px;
+  color: var(--omp-color-text-secondary);
+}

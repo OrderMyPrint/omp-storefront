@@ -1,0 +1,33 @@
+.nav {
+  padding-block: var(--omp-space-md);
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--omp-space-xs);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--omp-space-xs);
+}
+
+.link {
+  color: var(--omp-color-text-link);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.current {
+  font-weight: 600;
+  color: var(--omp-color-text-primary);
+}
+
+.sep {
+  color: var(--omp-color-icon-muted);
+}

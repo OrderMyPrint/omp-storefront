@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Order My Print — Storefront
 
-## Getting Started
+Customer-facing website for **Order My Print** (custom printing, India, INR). Built from the approved Figma design
+(`Order My Print — Platform Design`, gate G1). Requirements, architecture and decisions live in the docs repository
+[`OrderMyPrint/website`](https://github.com/OrderMyPrint/website).
 
-First, run the development server:
+> **Status: front end only.** The order, account and payment API is Phase 3 and is not built yet. Prices are
+> estimates calculated in the browser from researched reference rates (decision D-08), and forms that would send data
+> (sign-in, checkout, quote, contact, tracking) validate input and then show a "not open yet" notice with the phone
+> number. Nothing is sent anywhere.
+
+## Stack
+
+- Next.js 15 (App Router) + React 19 + TypeScript (strict)
+- CSS Modules on design tokens from Figma (`src/styles/tokens.css`, `src/styles/typography.css`) — no CSS framework
+- Self-hosted Inter and Montserrat variable fonts (SIL OFL, `src/fonts`)
+- `lucide-react` icons · Vitest for unit tests · ESLint + Prettier
+
+## Getting started
+
+Requires Node 20.9 or newer (CI uses Node 22).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # optional: NEXT_PUBLIC_SITE_URL
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Script           | What it does                                      |
+| ---------------- | ------------------------------------------------- |
+| `npm run dev`    | Development server                                |
+| `npm run build`  | Production build (all catalogue pages are static) |
+| `npm start`      | Serve the production build                        |
+| `npm run check`  | Lint + type check + unit tests                    |
+| `npm test`       | Unit tests (pricing engine, INR formatting)       |
+| `npm run format` | Format with Prettier                              |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+CI (`.github/workflows/ci.yml`) runs format check, lint, type check, tests, build and `npm audit --omit=dev` on every
+push and pull request.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project structure
 
-## Learn More
+```
+src/
+  app/                    Routes (one folder per page, Figma screen ID in each file's comment)
+  components/
+    ui/                   Design-system primitives: Button, Field, Alert, Breadcrumbs, CheckList, …
+    layout/               Header, Footer, PageIntro, ErrorState
+    home/                 Homepage sections (SF-HOME-01)
+    catalogue/            ProductCard, CategoryTile, ProductBrowser (filters + sort)
+    configurator/         Product configurator, tier table, artwork upload, product tabs
+    cart/ forms/ help/    Cart view, form components, FAQ browser
+  config/site.ts          Brand, phone, hours, routes and navigation
+  data/catalogue.ts       Categories, products, option steps and reference prices
+  data/help.ts            FAQ, artwork rules and policy drafts
+  lib/                    pricing (estimate engine), cart (browser storage), format (₹), validation
+  styles/                 Design tokens and text styles
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Pages
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Route                      | Figma screen   |
+| -------------------------- | -------------- |
+| `/`                        | SF-HOME-01     |
+| `/products`                | SF-PLP-01      |
+| `/category/[slug]`         | SF-CAT-01      |
+| `/products/[slug]`         | SF-PDP-01 … 07 |
+| `/search?q=`               | SF-SRCH-01     |
+| `/cart`                    | SF-CART-01     |
+| `/quote`                   | SF-QUO-01      |
+| `/track`                   | SF-TRK-01      |
+| `/sign-in`                 | SF-AUTH-01     |
+| `/help`, `/help/contact`   | SF-HELP-01, 02 |
+| `/help/artwork-guidelines` | SF-HELP-04     |
+| `/policies/[slug]`         | SF-HELP-03     |
+| 404 / error                | SF-ERR-01      |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Rules for contributors
 
-## Deploy on Vercel
+- **Use the tokens.** No hard-coded colours, spacing or radii in components; use `var(--omp-…)` and the `t-*` text
+  classes.
+- **No invented business data.** Prices, options and turnaround come from `docs/prd/product-catalogue-and-pricing.md`
+  §5. An option without a researched price is marked `unavailable` ("Priced on quotation") rather than given a price.
+  Legal policies stay marked as drafts until decision D-09 is closed.
+- **The server decides the price.** `src/lib/pricing.ts` is a display estimate. When the API exists, its pricing
+  engine is the single source of truth and checkout must use the server's figure.
+- **Brand assets are supplied files.** Never recolour or redraw `public/images/logo-compact.png`.
+- **No secrets in Git.** Only `.env.example` is committed.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Not built yet (needs the Phase 3 API)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+OTP sign-in and account pages, checkout and payment, order tracking results, quotation and contact submission,
+artwork upload to storage with virus scanning, server-side pricing, coupons, and the cookie-consent banner (needed once
+analytics is added).
