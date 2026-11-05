@@ -1,30 +1,42 @@
 import Link from "next/link";
 import { ChevronDown, LayoutGrid, MessageSquare, Phone, Truck, User } from "lucide-react";
-import { CartLink } from "./CartLink";
 import { Logo } from "@/components/ui/Logo/Logo";
-import { categories } from "@/data/catalogue";
-import { routes, site, utilityNav } from "@/config/site";
+import { routes } from "@/config/site";
+import type { SiteChrome } from "@/lib/chrome";
+import { CartLink } from "./CartLink";
 import { MobileMenu } from "./MobileMenu";
+import { NavAnchor } from "./NavAnchor";
 import { SearchForm } from "./SearchForm";
 import styles from "./Header.module.css";
 
-/** Figma "Header / Desktop | Tablet | Mobile" — one responsive header. */
-export function Header() {
+/** Figma "Header / Desktop | Tablet | Mobile" — one responsive header. Links come from the admin (Navigation). */
+export function Header({ chrome }: { chrome: SiteChrome }) {
   return (
     <header className={styles.header}>
+      {chrome.announcement ? (
+        <div className={styles.announcement} role="region" aria-label="Announcement">
+          <div className="container t-label-s">
+            {chrome.announcement.href ? (
+              <a href={chrome.announcement.href} rel={chrome.announcement.external ? "noopener noreferrer" : undefined}>
+                {chrome.announcement.message}
+              </a>
+            ) : (
+              chrome.announcement.message
+            )}
+          </div>
+        </div>
+      ) : null}
       <div className={styles.utilityBar}>
         <div className={`container ${styles.utilityInner}`}>
-          <a href={site.phone.href} className={`t-body-xs ${styles.phone}`}>
+          <a href={chrome.contact.phoneHref} className={`t-body-xs ${styles.phone}`}>
             <Phone size={16} aria-hidden="true" />
-            Help: {site.phone.display}
+            Help: {chrome.contact.phone}
           </a>
           <nav aria-label="Help links">
             <ul className={styles.utilityLinks}>
-              {utilityNav.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="t-label-s">
-                    {link.label}
-                  </Link>
+              {chrome.utility.map((link) => (
+                <li key={link.href + link.label}>
+                  <NavAnchor link={link} className="t-label-s" />
                 </li>
               ))}
             </ul>
@@ -33,7 +45,7 @@ export function Header() {
       </div>
 
       <div className={`container ${styles.mainRow}`}>
-        <MobileMenu />
+        <MobileMenu chrome={chrome} />
         <Logo size="header" className={styles.logo} />
         <SearchForm className={styles.search} />
         <div className={styles.actions}>
@@ -56,19 +68,15 @@ export function Header() {
             All products
             <ChevronDown size={16} aria-hidden="true" />
           </Link>
-          {categories.map((category) => (
-            <Link
-              key={category.slug}
-              href={routes.category(category.slug)}
-              className={`t-label-m ${styles.categoryLink}`}
-            >
-              {category.name}
-            </Link>
+          {chrome.categories.map((link) => (
+            <NavAnchor key={link.href} link={link} className={`t-label-m ${styles.categoryLink}`} />
           ))}
-          <Link href={routes.quote} className={`t-label-m ${styles.quoteLink}`}>
-            <MessageSquare size={20} aria-hidden="true" />
-            Get a bulk quote
-          </Link>
+          {chrome.quote ? (
+            <Link href={chrome.quote.href} className={`t-label-m ${styles.quoteLink}`}>
+              <MessageSquare size={20} aria-hidden="true" />
+              {chrome.quote.label}
+            </Link>
+          ) : null}
         </div>
       </nav>
       <div className={styles.spectrumRule} aria-hidden="true" />

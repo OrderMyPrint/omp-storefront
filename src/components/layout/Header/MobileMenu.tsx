@@ -4,12 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { categories } from "@/data/catalogue";
-import { routes, site, utilityNav } from "@/config/site";
+import { routes } from "@/config/site";
+import type { SiteChrome } from "@/lib/chrome";
+import { NavAnchor } from "./NavAnchor";
 import styles from "./Header.module.css";
 
 /** Figma "SF-NAV-01-M · Menu drawer" — shown below 768 px. */
-export function MobileMenu() {
+export function MobileMenu({ chrome }: { chrome: SiteChrome }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const panelId = useId();
@@ -49,11 +50,9 @@ export function MobileMenu() {
               All products
             </Link>
           </li>
-          {categories.map((category) => (
-            <li key={category.slug}>
-              <Link href={routes.category(category.slug)} className="t-label-l">
-                {category.name}
-              </Link>
+          {chrome.categories.map((link) => (
+            <li key={link.href}>
+              <NavAnchor link={link} className="t-label-l" />
             </li>
           ))}
         </ul>
@@ -64,16 +63,16 @@ export function MobileMenu() {
               Sign in
             </Link>
           </li>
-          {utilityNav.map((link) => (
-            <li key={link.href}>
-              <Link href={link.href} className="t-label-l">
-                {link.label}
-              </Link>
-            </li>
-          ))}
+          {chrome.utility
+            .filter((link) => link.mobile !== false)
+            .map((link) => (
+              <li key={link.href + link.label}>
+                <NavAnchor link={link} className="t-label-l" />
+              </li>
+            ))}
         </ul>
-        <a href={site.phone.href} className={`t-label-m ${styles.drawerPhone}`}>
-          Call {site.phone.display} · {site.hours}
+        <a href={chrome.contact.phoneHref} className={`t-label-m ${styles.drawerPhone}`}>
+          Call {chrome.contact.phone} · {chrome.contact.hours}
         </a>
       </nav>
     </>

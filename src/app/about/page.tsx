@@ -5,6 +5,8 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs/Breadcrumbs";
 import { CheckList } from "@/components/ui/CheckList/CheckList";
 import { CtaBand } from "@/components/ui/CtaBand/CtaBand";
 import { routes } from "@/config/site";
+import { ContentBlocks } from "@/components/content/ContentBlocks";
+import { getPage } from "@/lib/content";
 import styles from "../help/help.module.css";
 
 export const metadata: Metadata = {
@@ -13,7 +15,18 @@ export const metadata: Metadata = {
     "Order My Print — premium and professional printing for individuals, businesses and corporate teams across India.",
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const page = await getPage("/about");
+  if (page)
+    return (
+      <>
+        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: page.title }]} />
+        <div className={`container ${styles.page}`}>
+          <PageIntro overline={page.overline ?? undefined} title={page.title} lead={page.lead ?? undefined} />
+          <ContentBlocks blocks={page.blocks} inline />
+        </div>
+      </>
+    );
   return (
     <>
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "About us" }]} />

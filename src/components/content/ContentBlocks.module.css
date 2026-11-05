@@ -1,0 +1,120 @@
+.prose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-md);
+  max-width: 760px;
+  color: var(--omp-color-text-body);
+}
+
+.prose h2 {
+  margin-top: var(--omp-space-sm);
+  color: var(--omp-color-text-primary);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-xs);
+  padding-left: var(--omp-space-lg);
+  list-style: disc;
+}
+
+.cardsWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-lg);
+}
+
+.cardsWrap h2 {
+  color: var(--omp-color-text-primary);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--omp-space-lg);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--omp-space-sm);
+  padding: var(--omp-space-lg);
+  border: 1px solid var(--omp-color-border-default);
+  border-radius: var(--omp-radius-lg);
+  background: var(--omp-color-bg-surface);
+  color: var(--omp-color-text-body);
+}
+
+.card h3 {
+  color: var(--omp-color-text-primary);
+}
+
+.iconCircle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--omp-radius-full);
+  background: var(--omp-color-bg-accent-subtle);
+  color: var(--omp-color-cmyk-magenta);
+}
+
+.imageText {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: var(--omp-space-2xl);
+}
+
+.imageText[data-side="left"] .imageTextPhoto {
+  order: -1;
+}
+
+.imageTextCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--omp-space-md);
+  color: var(--omp-color-text-body);
+}
+
+.imageTextCopy h2 {
+  color: var(--omp-color-text-primary);
+}
+
+.imageTextPhoto {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  border-radius: var(--omp-radius-lg);
+  background: var(--omp-color-bg-subtle);
+}
+
+.imageTextPhoto img {
+  object-fit: cover;
+}
+
+@media (max-width: 1199px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .imageText {
+    grid-template-columns: 1fr;
+    gap: var(--omp-space-lg);
+  }
+
+  .imageTextPhoto {
+    order: -1;
+    height: 240px;
+  }
+}
+
+@media (max-width: 767px) {
+  .cards {
+    grid-template-columns: 1fr;
+    gap: var(--omp-space-md);
+  }
+}

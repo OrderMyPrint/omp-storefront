@@ -10,9 +10,10 @@ import { products } from "@/data/catalogue";
 import { routes } from "@/config/site";
 import { formatINR } from "@/lib/format";
 import { estimatePrice } from "@/lib/pricing";
+import type { PriceEstimatorBlock } from "@/lib/content";
 import styles from "./PriceEstimator.module.css";
 
-const points = [
+const defaultPoints = [
   "Quantity tiers show where you save",
   "Price breakdown: paper, finish, setup, GST",
   "Final price confirmed by our server at checkout",
@@ -21,7 +22,8 @@ const points = [
 const defaultProduct = products[0];
 
 /** Figma SF-HOME-01 · Price estimator band — a working quick estimate. */
-export function PriceEstimator() {
+export function PriceEstimator({ block }: { block?: PriceEstimatorBlock }) {
+  const points = block?.points.length ? block.points : defaultPoints;
   const [productSlug, setProductSlug] = useState(defaultProduct.slug);
   const product = products.find((item) => item.slug === productSlug) ?? defaultProduct;
   const quantities = product.tiers.map((tier) => tier.quantity);
@@ -49,9 +51,13 @@ export function PriceEstimator() {
           <SectionHeading
             id="estimator-title"
             tone="inverse"
-            overline="No surprises"
-            title="See your price before you order"
-            lead="Pick a product and quantity — our pricing engine shows the indicative price, quantity tiers and GST instantly."
+            overline={block?.overline ?? "No surprises"}
+            title={block?.heading ?? "See your price before you order"}
+            lead={
+              block
+                ? block.lead
+                : "Pick a product and quantity — our pricing engine shows the indicative price, quantity tiers and GST instantly."
+            }
           />
           <CheckList items={points} tone="inverse" />
         </div>

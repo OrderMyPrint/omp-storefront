@@ -1,10 +1,10 @@
-import Link from "next/link";
+import { NavAnchor } from "@/components/layout/Header/NavAnchor";
 import { Logo } from "@/components/ui/Logo/Logo";
-import { footerNav, site } from "@/config/site";
+import type { SiteChrome } from "@/lib/chrome";
 import styles from "./Footer.module.css";
 
-/** Figma "Footer / Desktop | Mobile". */
-export function Footer() {
+/** Figma "Footer / Desktop | Mobile". Columns come from the admin (Navigation › Footer). */
+export function Footer({ chrome }: { chrome: SiteChrome }) {
   const year = new Date().getFullYear();
   return (
     <footer className={styles.footer}>
@@ -14,23 +14,19 @@ export function Footer() {
           <div className={styles.logoPlate}>
             <Logo size="footer" />
           </div>
-          <p className="t-body-s">
-            Premium &amp; professional printing for individuals, businesses and corporate teams across India.
-          </p>
-          <a href={site.phone.href} className={`t-label-m ${styles.phone}`}>
-            {site.phone.display}
+          <p className="t-body-s">{chrome.tagline}</p>
+          <a href={chrome.contact.phoneHref} className={`t-label-m ${styles.phone}`}>
+            {chrome.contact.phone}
           </a>
-          <p className={`t-body-xs ${styles.hours}`}>{site.hours}</p>
+          <p className={`t-body-xs ${styles.hours}`}>{chrome.contact.hours}</p>
         </div>
-        {footerNav.map((group) => (
+        {chrome.footer.map((group) => (
           <nav key={group.title} aria-label={group.title} className={styles.group}>
             <p className={`t-label-m ${styles.groupTitle}`}>{group.title}</p>
             <ul className={styles.links}>
               {group.links.map((link) => (
                 <li key={link.href + link.label}>
-                  <Link href={link.href} className="t-body-s">
-                    {link.label}
-                  </Link>
+                  <NavAnchor link={link} className="t-body-s" />
                 </li>
               ))}
             </ul>

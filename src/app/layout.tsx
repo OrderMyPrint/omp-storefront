@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { Footer } from "@/components/layout/Footer/Footer";
 import { Header } from "@/components/layout/Header/Header";
 import { site } from "@/config/site";
+import { getSiteChrome } from "@/lib/chrome";
 import "./globals.css";
 
 // Self-hosted variable fonts (SIL OFL, see src/fonts) — no build-time network fetch.
@@ -39,16 +40,17 @@ export const viewport: Viewport = {
   themeColor: "#102848",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const chrome = await getSiteChrome();
   return (
     <html lang="en-IN" className={`${montserrat.variable} ${inter.variable}`}>
       <body>
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <Header />
+        <Header chrome={chrome} />
         <main id="main">{children}</main>
-        <Footer />
+        <Footer chrome={chrome} />
       </body>
     </html>
   );

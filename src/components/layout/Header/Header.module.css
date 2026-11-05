@@ -4,6 +4,18 @@
   background: var(--omp-color-bg-surface);
 }
 
+/* Announcement bar (Site settings › Announcement) */
+.announcement {
+  padding-block: var(--omp-space-xs);
+  background: var(--omp-color-bg-accent-subtle);
+  color: var(--omp-color-text-accent);
+  text-align: center;
+}
+
+.announcement a {
+  text-decoration: underline;
+}
+
 /* Utility bar */
 .utilityBar {
   background: var(--omp-color-bg-brand);

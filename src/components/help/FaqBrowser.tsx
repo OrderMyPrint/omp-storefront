@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { faqGroups } from "@/data/help";
+import { faqGroups as builtInGroups, type FaqGroup } from "@/data/help";
 import { cx } from "@/lib/cx";
 import styles from "./FaqBrowser.module.css";
 
 /** Figma SF-HELP-01 — topic navigation, question search and accordions. */
-export function FaqBrowser() {
-  const [topic, setTopic] = useState(faqGroups[0].id);
+export function FaqBrowser({ groups: faqGroups = builtInGroups }: { groups?: FaqGroup[] }) {
+  const [topic, setTopic] = useState(faqGroups[0]?.id ?? "");
   const [query, setQuery] = useState("");
 
   const searching = query.trim().length > 1;
@@ -21,7 +21,7 @@ export function FaqBrowser() {
         items: group.items.filter((item) => `${item.q} ${item.a}`.toLowerCase().includes(needle)),
       }))
       .filter((group) => group.items.length);
-  }, [query, searching, topic]);
+  }, [faqGroups, query, searching, topic]);
 
   return (
     <div className={styles.layout}>

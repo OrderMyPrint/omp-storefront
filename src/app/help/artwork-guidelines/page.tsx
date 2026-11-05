@@ -6,6 +6,8 @@ import { Alert } from "@/components/ui/Alert/Alert";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs/Breadcrumbs";
 import { artworkRules } from "@/data/help";
 import { routes } from "@/config/site";
+import { ContentBlocks } from "@/components/content/ContentBlocks";
+import { getPage } from "@/lib/content";
 import styles from "../help.module.css";
 
 export const metadata: Metadata = {
@@ -16,7 +18,35 @@ export const metadata: Metadata = {
 const icons = { file: FileText, layers: Layers, image: ImageIcon, grid: Grid2x2, printer: Printer, pen: PenLine };
 
 /** SF-HELP-04 · Artwork guidelines. */
-export default function ArtworkGuidelinesPage() {
+export default async function ArtworkGuidelinesPage() {
+  const page = await getPage("/help/artwork-guidelines");
+  if (page)
+    return (
+      <>
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Help centre", href: routes.help },
+            { label: "Artwork guidelines" },
+          ]}
+        />
+        <div className={`container ${styles.page}`}>
+          <section className={styles.hero}>
+            <PageIntro overline={page.overline ?? undefined} title={page.title} lead={page.lead ?? undefined} />
+            <div className={styles.heroImage}>
+              <Image
+                src="/images/product-visiting-cards.png"
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 1199px) 100vw, 600px"
+              />
+            </div>
+          </section>
+          <ContentBlocks blocks={page.blocks} inline />
+        </div>
+      </>
+    );
   return (
     <>
       <Breadcrumbs

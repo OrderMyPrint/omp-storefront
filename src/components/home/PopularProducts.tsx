@@ -5,14 +5,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "@/components/catalogue/ProductCard/ProductCard";
 import { SectionHeading } from "@/components/ui/SectionHeading/SectionHeading";
 import { getProduct, popularProductSlugs, type Product } from "@/data/catalogue";
+import type { ProductCarouselBlock } from "@/lib/content";
 import styles from "./PopularProducts.module.css";
 
-const popular = popularProductSlugs
-  .map((slug) => getProduct(slug))
-  .filter((product): product is Product => Boolean(product));
+const bySlugs = (slugs: string[]) =>
+  slugs.map((slug) => getProduct(slug)).filter((product): product is Product => Boolean(product));
 
 /** Figma SF-HOME-01 · Popular products — horizontal carousel with arrow controls. */
-export function PopularProducts() {
+export function PopularProducts({ block }: { block?: ProductCarouselBlock }) {
+  const popular = bySlugs(block?.productSlugs ?? popularProductSlugs);
   const trackRef = useRef<HTMLUListElement>(null);
   const [canScroll, setCanScroll] = useState({ back: false, forward: true });
 
@@ -44,9 +45,13 @@ export function PopularProducts() {
         <div className={styles.head}>
           <SectionHeading
             id="popular-title"
-            overline="Popular now"
-            title="Our most-ordered print products"
-            lead="The business essentials our customers reorder most — configure any of them in minutes."
+            overline={block?.overline ?? "Popular now"}
+            title={block?.heading ?? "Our most-ordered print products"}
+            lead={
+              block
+                ? block.lead
+                : "The business essentials our customers reorder most — configure any of them in minutes."
+            }
           />
           <div className={styles.controls}>
             <button
