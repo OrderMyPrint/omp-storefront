@@ -17,6 +17,7 @@ import {
   priceConfiguration,
   type Configuration,
 } from "@/lib/pricing";
+import { usePricePreview } from "@/lib/usePricePreview";
 import { ArtworkUpload, type ArtworkState } from "./ArtworkUpload";
 import { TierTable } from "./TierTable";
 import styles from "./Configurator.module.css";
@@ -55,11 +56,31 @@ export function Configurator({ product }: { product: Product }) {
   const [breakdownOpen, setBreakdownOpen] = useState(true);
   const [added, setAdded] = useState(false);
 
-  const price = useMemo(() => priceConfiguration(product, config), [product, config]);
+  const local = useMemo(() => priceConfiguration(product, config), [product, config]);
+  const preview = usePricePreview(product, config);
   const minimum = Math.min(...product.tiers.map((tier) => tier.quantity));
   const quoteFrom = product.quantity.kind === "sizes" ? product.quantity.quoteFrom : Infinity;
-  const belowMinimum = price.quantity < minimum;
-  const needsQuote = price.quantity >= quoteFrom;
+
+  // The server's price wins whenever it is available for this exact configuration;
+  // otherwise the local estimate is shown and labelled as an estimate.
+  const server = preview.status === "ok" ? preview.price : null;
+  const price = server
+    ? {
+        quantity: server.quantity,
+        lines: server.lines.map((line) => ({ label: line.label, amount: Number(line.amount) })),
+        subtotal: Number(server.subtotal ?? 0),
+        gst: Number(server.gst ?? 0),
+        total: Number(server.total ?? 0),
+      }
+    : local;
+  const serverErrors = server && !server.valid ? server.errors : [];
+  const belowMinimum = server
+    ? serverErrors.some((error) => error.code === "QUANTITY_BELOW_MINIMUM")
+    : local.quantity < minimum;
+  const needsQuote = server ? server.requiresQuote : local.quantity >= quoteFrom;
+  const otherErrors = serverErrors.filter((error) => error.code !== "QUANTITY_BELOW_MINIMUM");
+  const blocked = belowMinimum || needsQuote || otherErrors.length > 0;
+  const updating = preview.status === "loading";
   const missingArtwork = artwork.mode === "now" && product.artwork.slots.some((slot) => !artwork.files[slot]);
 
   const update = (patch: Partial<Configuration>) => {
@@ -90,7 +111,8 @@ export function Configurator({ product }: { product: Product }) {
       unitLabel: noun,
       options: describeConfiguration(product, config),
       subtotal: price.subtotal,
-      gstRate: product.gstRate,
+      gstRate: server ? Number(server.gstRate) / 100 : product.gstRate,
+      pricingVersionId: server?.pricingVersionId,
       artwork: artwork.mode,
       files: Object.entries(artwork.files).map(([slot, file]) => `${slot}: ${file.name}`),
     });
@@ -99,7 +121,15 @@ export function Configurator({ product }: { product: Product }) {
 
   let stepNumber = 0;
   const noun = product.unitNoun.one;
-  const gstPercent = Math.round(product.gstRate * 100);
+  const gstPercent = server ? Number(server.gstRate) : Math.round(product.gstRate * 100);
+  const priceSource =
+    preview.status === "ok"
+      ? { tone: "live", text: "Live price from our pricing server" }
+      : preview.status === "loading"
+        ? { tone: "pending", text: "Checking the price with our server…" }
+        : preview.status === "error"
+          ? { tone: "estimate", text: "Estimate — our pricing server can't be reached right now" }
+          : { tone: "estimate", text: "Estimate" };
 
   return (
     <div className={styles.configurator}>
@@ -341,7 +371,24 @@ export function Configurator({ product }: { product: Product }) {
           </h2>
           <span className="t-label-s">{breakdownOpen ? "Hide" : "Show"}</span>
         </button>
-        <dl id="price-lines" className={styles.lines} hidden={!breakdownOpen}>
+        <p className={`t-label-s ${styles.source}`} data-tone={priceSource.tone} role="status">
+          {priceSource.text}
+        </p>
+        {otherErrors.length ? (
+          <Alert tone="error" title="This combination can't be priced">
+            <ul>
+              {otherErrors.map((error) => (
+                <li key={`${error.field}-${error.code}`}>{error.message}</li>
+              ))}
+            </ul>
+          </Alert>
+        ) : null}
+        <dl
+          id="price-lines"
+          className={cx(styles.lines, updating && styles.updating)}
+          hidden={!breakdownOpen}
+          aria-busy={updating}
+        >
           {price.lines.map((line) => (
             <div key={line.label} className={styles.line}>
               <dt className="t-body-m">{line.label}</dt>
@@ -362,14 +409,13 @@ export function Configurator({ product }: { product: Product }) {
           </div>
         </dl>
         <div className={styles.totalRow}>
-          <span className="t-h5">Estimated total</span>
-          <span className="t-price-l" aria-live="polite">
-            {belowMinimum || needsQuote ? "—" : formatINR(price.total)}
+          <span className="t-h5">{server ? "Total" : "Estimated total"}</span>
+          <span className={cx("t-price-l", updating && styles.updating)} aria-live="polite">
+            {blocked ? "—" : formatINR(price.total)}
           </span>
         </div>
         <p className="t-body-xs">
-          Includes your selected options and GST. Delivery is added at checkout, and the final price is confirmed by our
-          server.
+          Includes your selected options and GST. Delivery is added at checkout, where the price is confirmed again.
         </p>
 
         {added ? (
@@ -386,7 +432,7 @@ export function Configurator({ product }: { product: Product }) {
             </Button>
           ) : (
             <>
-              <Button variant="accent" icon={ShoppingCart} onClick={handleAdd} disabled={belowMinimum} fullWidth>
+              <Button variant="accent" icon={ShoppingCart} onClick={handleAdd} disabled={blocked || updating} fullWidth>
                 Add to cart
               </Button>
               <Button href={`${routes.quote}?product=${product.slug}`} variant="secondary" fullWidth>
@@ -416,8 +462,8 @@ export function Configurator({ product }: { product: Product }) {
       {/* Mobile sticky price bar (SF-PDP-01c-M) */}
       <div className={styles.stickyBar}>
         <div>
-          <p className="t-body-xs">Estimated total</p>
-          <p className="t-price-m">{belowMinimum || needsQuote ? "—" : formatINR(price.total)}</p>
+          <p className="t-body-xs">{server ? "Total" : "Estimated total"}</p>
+          <p className="t-price-m">{blocked ? "—" : formatINR(price.total)}</p>
         </div>
         <Button href="#price-title" variant="accent">
           Review price

@@ -602,6 +602,32 @@
   color: var(--omp-color-text-link);
 }
 
+.source {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--omp-space-2xs);
+  align-self: flex-start;
+  padding: var(--omp-space-2xs) var(--omp-space-xs);
+  border-radius: var(--omp-radius-sm);
+  background: var(--omp-color-bg-subtle);
+  color: var(--omp-color-text-secondary);
+}
+
+.source[data-tone="live"] {
+  background: var(--omp-color-status-success-bg);
+  color: var(--omp-color-status-success-fg);
+}
+
+.source[data-tone="estimate"] {
+  background: var(--omp-color-status-warning-bg);
+  color: var(--omp-color-status-warning-fg);
+}
+
+.updating {
+  opacity: 0.55;
+  transition: opacity 150ms ease;
+}
+
 .lines {
   display: flex;
   flex-direction: column;

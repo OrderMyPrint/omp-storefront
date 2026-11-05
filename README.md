@@ -4,10 +4,11 @@ Customer-facing website for **Order My Print** (custom printing, India, INR). Bu
 (`Order My Print — Platform Design`, gate G1). Requirements, architecture and decisions live in the docs repository
 [`OrderMyPrint/website`](https://github.com/OrderMyPrint/website).
 
-> **Status: front end only.** The order, account and payment API is Phase 3 and is not built yet. Prices are
-> estimates calculated in the browser from researched reference rates (decision D-08), and forms that would send data
-> (sign-in, checkout, quote, contact, tracking) validate input and then show a "not open yet" notice with the phone
-> number. Nothing is sent anywhere.
+> **Status:** product prices come live from the API ([`OrderMyPrint/omp-api`](https://github.com/OrderMyPrint/omp-api),
+> `POST /api/v1/pricing/preview`) when `NEXT_PUBLIC_API_URL` is set; otherwise, or if the API can't be reached, the
+> configurator shows a browser estimate labelled as such. Prices are researched reference rates (D-08). Sign-in,
+> checkout, quote, contact and tracking are not connected yet (their API endpoints are still to be built): those forms
+> validate input and then show a "not open yet" notice with the phone number. Nothing else is sent anywhere.
 
 ## Stack
 
@@ -22,7 +23,7 @@ Requires Node 20.9 or newer (CI uses Node 22).
 
 ```bash
 npm install
-cp .env.example .env.local   # optional: NEXT_PUBLIC_SITE_URL
+cp .env.example .env.local   # NEXT_PUBLIC_API_URL (the API, e.g. http://localhost:4000) and NEXT_PUBLIC_SITE_URL
 npm run dev                  # http://localhost:3000
 ```
 

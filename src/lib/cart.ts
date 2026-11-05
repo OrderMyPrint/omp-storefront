@@ -18,6 +18,8 @@ export type CartItem = {
   options: string[];
   subtotal: number;
   gstRate: number;
+  /** Pricing version the server used, when the price came from the API. */
+  pricingVersionId?: string;
   artwork: "now" | "later";
   files: string[];
   addedAt: number;
