@@ -32,7 +32,17 @@ export type ResolvedLink = { href: string; external: boolean };
 export type ResolvedCta = ResolvedLink & { label: string };
 export type ResolvedImage = { url: string; alt: string; width: number | null; height: number | null };
 
-type Base = { id: string; visible?: boolean };
+/** Visual editor presets (D-30): brand-token choices only, mapped to CSS in globals.css. */
+export type SectionStyle = {
+  background?: "white" | "paper" | "brandTint" | "navy";
+  spacing?: "compact" | "standard" | "spacious";
+  width?: "contained" | "full";
+  align?: "start" | "center";
+  imageSide?: "start" | "end";
+};
+export type SectionDevices = { desktop: boolean; tablet: boolean; mobile: boolean };
+
+type Base = { id: string; visible?: boolean; style?: SectionStyle; devices?: SectionDevices };
 export type HeroBlock = Base & {
   type: "hero";
   overline?: string;

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button/Button";
 import { CtaBand } from "@/components/ui/CtaBand/CtaBand";
 import type { ContentBlock } from "@/lib/content";
 import styles from "./ContentBlocks.module.css";
+import { Section } from "./Section";
 
 /** Stable anchor for a rich-text heading (used by the policy page's "On this page" list). */
 export const headingId = (blockId: string, index: number) => `${blockId}-${index}`;
@@ -33,10 +34,17 @@ export function ContentBlocks({ blocks, inline = false }: { blocks: ContentBlock
   return (
     <>
       {blocks.map((block) => (
-        <Block key={block.id} block={block} inline={inline} />
+        <Section key={block.id} block={block}>
+          <ContentSection block={block} inline={inline} />
+        </Section>
       ))}
     </>
   );
+}
+
+/** One section without the preset wrapper (the visual editor adds its own). */
+export function ContentSection({ block, inline = false }: { block: ContentBlock; inline?: boolean }) {
+  return <Block block={block} inline={inline} />;
 }
 
 function Block({ block, inline }: { block: ContentBlock; inline: boolean }) {

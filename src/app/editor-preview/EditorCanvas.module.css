@@ -1,0 +1,121 @@
+.canvas {
+  min-height: 60vh;
+}
+
+.loading {
+  min-height: 60vh;
+}
+
+.standalone,
+.empty {
+  padding-block: var(--omp-space-4xl);
+  text-align: center;
+}
+
+.empty button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--omp-space-xs);
+  margin-top: var(--omp-space-md);
+  padding: var(--omp-space-sm) var(--omp-space-lg);
+  border: 0;
+  border-radius: 999px;
+  background: var(--omp-color-action-accent);
+  color: var(--omp-color-text-inverse);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.section {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Hover and selection outlines sit above the section without shifting its layout. */
+.outline {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  border: 1px dashed transparent;
+  pointer-events: none;
+}
+
+.section:hover > .outline {
+  border-color: var(--omp-color-cmyk-cyan);
+}
+
+.section[data-selected] > .outline {
+  border: 2px solid var(--omp-color-action-accent);
+}
+
+.toolbar {
+  position: absolute;
+  top: var(--omp-space-sm);
+  left: var(--omp-space-sm);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--omp-color-bg-inverse);
+  box-shadow: 0 6px 20px rgb(16 40 72 / 25%);
+}
+
+.label {
+  margin-right: 2px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--omp-color-action-accent);
+  color: var(--omp-color-text-inverse);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.toolbar button {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--omp-color-text-inverse);
+  cursor: pointer;
+}
+
+.toolbar button:hover {
+  background: rgb(255 255 255 / 12%);
+}
+
+/* "Add section" appears on the boundary below a hovered section. */
+.insert {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  z-index: 45;
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--omp-color-action-accent);
+  color: var(--omp-color-text-inverse);
+  font-size: 12px;
+  font-weight: 600;
+  transform: translateX(-50%);
+  cursor: pointer;
+}
+
+.section:hover > .insert {
+  display: inline-flex;
+}
+
+.section [contenteditable] {
+  outline: 2px solid var(--omp-color-action-accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+  cursor: text;
+}

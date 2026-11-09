@@ -16,11 +16,17 @@ type Props = {
 export function SectionHeading({ overline, title, lead, tone = "default", id, className }: Props) {
   return (
     <div className={cx(styles.head, tone === "inverse" && styles.inverse, className)}>
-      <p className={cx("t-overline", styles.overline)}>{overline}</p>
-      <h2 id={id} className={cx("t-h2", styles.title)}>
+      <p className={cx("t-overline", styles.overline)} data-edit-field="overline">
+        {overline}
+      </p>
+      <h2 id={id} className={cx("t-h2", styles.title)} data-edit-field="heading">
         {title}
       </h2>
-      {lead ? <p className={cx("t-body-l", styles.lead)}>{lead}</p> : null}
+      {lead ? (
+        <p className={cx("t-body-l", styles.lead)} data-edit-field="lead">
+          {lead}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -34,11 +34,19 @@ export function Hero({ block = fallback }: { block?: HeroBlock }) {
     <section className={styles.hero} aria-labelledby="hero-title">
       <div className={`container ${styles.inner}`}>
         <div className={styles.copy}>
-          {block.overline ? <p className={`t-overline ${styles.overline}`}>{block.overline}</p> : null}
-          <h1 id="hero-title" className={`t-display-xl ${styles.title}`}>
+          {block.overline ? (
+            <p className={`t-overline ${styles.overline}`} data-edit-field="overline">
+              {block.overline}
+            </p>
+          ) : null}
+          <h1 id="hero-title" className={`t-display-xl ${styles.title}`} data-edit-field="heading">
             {block.heading}
           </h1>
-          {block.body ? <p className={`t-body-l ${styles.lead}`}>{block.body}</p> : null}
+          {block.body ? (
+            <p className={`t-body-l ${styles.lead}`} data-edit-field="body">
+              {block.body}
+            </p>
+          ) : null}
           {block.points.length ? <CheckList items={block.points} /> : null}
           <div className={styles.ctas}>
             {block.primary ? (

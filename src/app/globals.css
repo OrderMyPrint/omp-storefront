@@ -119,3 +119,76 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Visual editor presets (AD-WEB-09, D-30). Set per section in the admin; every
+ * value maps to a brand token. Rules target the section's own root (first child)
+ * so editor overlays inside the wrapper are untouched. Breakpoints match the rest of the site:
+ * mobile < 768 px, tablet 768–1199 px, desktop ≥ 1200 px.
+ * ------------------------------------------------------------------------- */
+.omp-section[data-bg] > :first-child {
+  background: transparent !important;
+}
+.omp-section[data-bg="white"] {
+  background: var(--omp-color-bg-surface);
+}
+.omp-section[data-bg="paper"] {
+  background: var(--omp-color-bg-canvas);
+}
+.omp-section[data-bg="brandTint"] {
+  background: var(--omp-color-bg-brand-subtle);
+}
+.omp-section[data-bg="navy"] {
+  background: var(--omp-color-bg-inverse);
+  --omp-color-text-primary: var(--omp-color-text-inverse);
+  --omp-color-text-body: var(--omp-color-text-inverse);
+  --omp-color-text-secondary: var(--omp-color-text-inverse);
+  color: var(--omp-color-text-inverse);
+}
+/* Cards and panels keep their own light surface and dark text on a navy band. */
+.omp-section[data-bg="navy"] :is([class*="card"], [class*="Card"], [class*="panel"], [class*="Panel"]) {
+  --omp-color-text-primary: #102848;
+  --omp-color-text-body: #2e2d2a;
+  --omp-color-text-secondary: #5f5c55;
+  color: var(--omp-color-text-body);
+}
+.omp-section[data-spacing="compact"] > :first-child {
+  padding-block: var(--omp-space-2xl) !important;
+}
+.omp-section[data-spacing="spacious"] > :first-child {
+  padding-block: var(--omp-space-4xl) !important;
+}
+.omp-section[data-width="full"] .container {
+  max-width: none;
+}
+.omp-section[data-align="center"] {
+  text-align: center;
+}
+.omp-section[data-align="center"] :is([class*="head"], [class*="copy"]) {
+  align-items: center;
+  margin-inline: auto;
+}
+/* Image on the other side: reverse the section's two columns (desktop and tablet). */
+@media (min-width: 768px) {
+  .omp-section[data-image-side="start"] > :first-child > .container {
+    direction: rtl;
+  }
+  .omp-section[data-image-side="start"] > :first-child > .container > * {
+    direction: ltr;
+  }
+}
+@media (min-width: 1200px) {
+  .omp-section[data-hide-desktop] {
+    display: none;
+  }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .omp-section[data-hide-tablet] {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .omp-section[data-hide-mobile] {
+    display: none;
+  }
+}
