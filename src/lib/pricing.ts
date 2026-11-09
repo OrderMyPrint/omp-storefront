@@ -24,7 +24,11 @@ export function tierFor(tiers: PriceTier[], quantity: number): PriceTier {
 }
 
 /** Homepage quick estimate: tier price plus one per-unit option. */
-export function estimatePrice(product: Product, quantity: number, option?: Choice): Estimate {
+export function estimatePrice(
+  product: Pick<Product, "tiers" | "gstRate">,
+  quantity: number,
+  option?: Choice,
+): Estimate {
   const tier = tierFor(product.tiers, quantity);
   const unitPrice = roundToPaise(tier.unitPrice + (option?.perUnit ?? 0));
   const subtotal = roundToPaise(unitPrice * quantity);

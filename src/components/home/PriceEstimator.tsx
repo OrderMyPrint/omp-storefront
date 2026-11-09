@@ -6,7 +6,7 @@ import { CheckList } from "@/components/ui/CheckList/CheckList";
 import { QuantityStepper } from "@/components/ui/Field/QuantityStepper";
 import { Select } from "@/components/ui/Field/Select";
 import { SectionHeading } from "@/components/ui/SectionHeading/SectionHeading";
-import { products } from "@/data/catalogue";
+import { useCatalogue } from "@/components/catalogue/CatalogueProvider";
 import { routes } from "@/config/site";
 import { formatINR } from "@/lib/format";
 import { estimatePrice } from "@/lib/pricing";
@@ -19,23 +19,26 @@ const defaultPoints = [
   "Final price confirmed by our server at checkout",
 ];
 
-const defaultProduct = products[0];
-
 /** Figma SF-HOME-01 · Price estimator band — a working quick estimate. */
 export function PriceEstimator({ block }: { block?: PriceEstimatorBlock }) {
   const points = block?.points.length ? block.points : defaultPoints;
-  const [productSlug, setProductSlug] = useState(defaultProduct.slug);
+  const { estimator: products } = useCatalogue();
+  const defaultProduct = products[0];
+  const [productSlug, setProductSlug] = useState(defaultProduct?.slug ?? "");
   const product = products.find((item) => item.slug === productSlug) ?? defaultProduct;
-  const quantities = product.tiers.map((tier) => tier.quantity);
+  const quantities = product?.tiers.map((tier) => tier.quantity) ?? [];
 
   const [quantity, setQuantity] = useState(500);
   const [optionId, setOptionId] = useState("double");
 
   const activeQuantity = quantities.includes(quantity) ? quantity : quantities[Math.min(2, quantities.length - 1)];
   const option =
-    product.estimatorOption.choices.find((choice) => choice.id === optionId) ?? product.estimatorOption.choices[0];
+    product?.estimatorOption.choices.find((choice) => choice.id === optionId) ?? product?.estimatorOption.choices[0];
 
-  const estimate = useMemo(() => estimatePrice(product, activeQuantity, option), [product, activeQuantity, option]);
+  const estimate = useMemo(
+    () => (product ? estimatePrice(product, activeQuantity, option) : null),
+    [product, activeQuantity, option],
+  );
 
   const changeProduct = (slug: string) => {
     const next = products.find((item) => item.slug === slug) ?? defaultProduct;
@@ -43,6 +46,9 @@ export function PriceEstimator({ block }: { block?: PriceEstimatorBlock }) {
     setQuantity(next.tiers[Math.min(2, next.tiers.length - 1)].quantity);
     setOptionId(next.estimatorOption.choices[0].id);
   };
+
+  // No priced product to estimate (e.g. an empty catalogue): leave the band out.
+  if (!product || !option || !estimate) return null;
 
   return (
     <section className={styles.band} aria-labelledby="estimator-title">

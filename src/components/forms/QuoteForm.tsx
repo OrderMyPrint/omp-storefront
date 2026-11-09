@@ -6,21 +6,26 @@ import { Button } from "@/components/ui/Button/Button";
 import { Select } from "@/components/ui/Field/Select";
 import { TextArea, TextField } from "@/components/ui/Field/TextField";
 import { PreLaunchNotice } from "@/components/ui/PreLaunchNotice/PreLaunchNotice";
-import { products } from "@/data/catalogue";
 import { digitsOnly, isEmail, isIndianMobile } from "@/lib/validation";
 import styles from "./forms.module.css";
 
 type Item = { key: number; product: string; quantity: string; notes: string };
 type Errors = Record<string, string | undefined>;
 
-const productOptions = [
-  ...products.map((product) => ({ value: product.slug, label: product.name })),
-  { value: "other", label: "Something else" },
-];
-
-/** SF-QUO-01 · Bulk quote request (multi-item). */
-export function QuoteForm({ initialProduct }: { initialProduct?: string }) {
-  const start = products.some((product) => product.slug === initialProduct) ? initialProduct! : products[0].slug;
+/** SF-QUO-01 · Bulk quote request (multi-item). Products come from the live catalogue. */
+export function QuoteForm({
+  products,
+  initialProduct,
+}: {
+  products: { slug: string; name: string }[];
+  initialProduct?: string;
+}) {
+  const productOptions = [
+    ...products.map((product) => ({ value: product.slug, label: product.name })),
+    { value: "other", label: "Something else" },
+  ];
+  const first = products[0]?.slug ?? "other";
+  const start = products.some((product) => product.slug === initialProduct) ? initialProduct! : first;
   const [items, setItems] = useState<Item[]>([{ key: 1, product: start, quantity: "", notes: "" }]);
   const [contact, setContact] = useState({
     company: "",
@@ -101,7 +106,7 @@ export function QuoteForm({ initialProduct }: { initialProduct?: string }) {
         className={styles.addItem}
         disabled={items.length >= 10}
         onClick={() =>
-          setItems((current) => [...current, { key: Date.now(), product: products[0].slug, quantity: "", notes: "" }])
+          setItems((current) => [...current, { key: Date.now(), product: first, quantity: "", notes: "" }])
         }
       >
         Add another product

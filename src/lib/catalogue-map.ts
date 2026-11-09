@@ -228,19 +228,38 @@ function toStep(group: ApiOptionGroup, setup: ApiProduct["setupCharges"]): Confi
   };
 }
 
-/** Homepage estimator option: the first single-choice group with priced options. */
-function estimatorOption(steps: ConfigStep[]): Product["estimatorOption"] {
-  const step = steps.find(
-    (item) => item.kind !== "multi" && item.choices.some((choice) => choice.perUnit) && item.choices.length > 1,
-  );
+/**
+ * Homepage estimator option, with the API's prices: the option group the design
+ * uses for a launch product (e.g. "Printing" for visiting cards), otherwise the
+ * first single-choice group that has priced options.
+ */
+function estimatorOption(steps: ConfigStep[], designed?: Product["estimatorOption"]): Product["estimatorOption"] {
+  const single = steps.filter((item) => item.kind !== "multi" && item.choices.length > 1);
+  const ids = designed?.choices.map((choice) => choice.id) ?? [];
+  const match = ids.length
+    ? single.find((item) => ids.every((id) => item.choices.some((choice) => choice.id === id)))
+    : undefined;
+  const step = match ?? single.find((item) => item.choices.some((choice) => choice.perUnit));
   if (!step) return { label: "", choices: [] };
   return {
-    label: step.short ?? step.title,
+    label: match && designed ? designed.label : (step.short ?? step.title),
     choices: step.choices
-      .filter((choice) => !choice.unavailable)
+      .filter((choice) => !choice.unavailable && choice.unitPrice === undefined)
       .map((choice) => ({ id: choice.id, label: choice.label, perUnit: choice.perUnit ?? 0 })),
   };
 }
+
+/** What the homepage price estimator needs for one product. */
+export type EstimatorProduct = Pick<Product, "slug" | "name" | "gstRate" | "unitNoun" | "tiers" | "estimatorOption">;
+
+export const toEstimatorProduct = ({
+  slug,
+  name,
+  gstRate,
+  unitNoun,
+  tiers,
+  estimatorOption,
+}: Product): EstimatorProduct => ({ slug, name, gstRate, unitNoun, tiers, estimatorOption });
 
 export function toProduct(row: ApiProduct): Product {
   const known = builtInProduct(row.slug);
@@ -282,7 +301,14 @@ export function toProduct(row: ApiProduct): Product {
     description: row.description ?? "",
     uses: row.uses,
     materials: row.materials,
-    estimatorOption: estimatorOption(steps),
+    estimatorOption: estimatorOption(steps, known?.estimatorOption),
     rules: row.rules ?? [],
   };
 }
+
+/** Catalogue the homepage sections and the editor canvas read from context. */
+export type CatalogueSnapshot = {
+  categories: Category[];
+  products: ListedProduct[];
+  estimator: EstimatorProduct[];
+};

@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { CatalogueProvider } from "@/components/catalogue/CatalogueProvider";
 import { Footer } from "@/components/layout/Footer/Footer";
 import { Header } from "@/components/layout/Header/Header";
 import { site } from "@/config/site";
+import { getCatalogueSnapshot } from "@/lib/catalogue";
 import { getSiteChrome } from "@/lib/chrome";
 import "./globals.css";
 
@@ -41,7 +43,7 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const chrome = await getSiteChrome();
+  const [chrome, catalogue] = await Promise.all([getSiteChrome(), getCatalogueSnapshot()]);
   return (
     <html lang="en-IN" className={`${montserrat.variable} ${inter.variable}`}>
       <body>
@@ -49,7 +51,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           Skip to content
         </a>
         <Header chrome={chrome} />
-        <main id="main">{children}</main>
+        <main id="main">
+          <CatalogueProvider value={catalogue}>{children}</CatalogueProvider>
+        </main>
         <Footer chrome={chrome} />
       </body>
     </html>

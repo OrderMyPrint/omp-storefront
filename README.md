@@ -52,7 +52,7 @@ src/
     configurator/         Product configurator, tier table, artwork upload, product tabs
     cart/ forms/ help/    Cart view, form components, FAQ browser
   config/site.ts          Brand, phone, hours, routes and navigation
-  data/catalogue.ts       Catalogue types + built-in fallback (used when the API is unreachable, and by the homepage)
+  data/catalogue.ts       Catalogue types + built-in fallback (used when the API is not configured or unreachable)
   data/help.ts            FAQ, artwork rules and policy drafts
   lib/                    catalogue (live catalogue from the API + slug redirects), rules (constraint hints),
                           pricing (estimate engine), cart (browser storage), format (₹), validation

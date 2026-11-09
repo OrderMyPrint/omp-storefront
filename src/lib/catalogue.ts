@@ -12,11 +12,13 @@ import { API_URL } from "@/lib/api";
 import {
   listedFromProduct,
   toCategory,
+  toEstimatorProduct,
   toListedProduct,
   toProduct,
   type ApiCategory,
   type ApiProduct,
   type ApiProductSummary,
+  type CatalogueSnapshot,
   type ListedProduct,
 } from "@/lib/catalogue-map";
 import { getSiteSettings } from "@/lib/content";
@@ -84,6 +86,16 @@ export const getProduct = cache(async (slug: string): Promise<Product | undefine
   if (result.status === "ok") return toProduct(result.data);
   if (result.status === "missing") return undefined;
   return builtInProduct(slug);
+});
+
+/** Catalogue for the homepage sections and editor canvas, provided to them through context. */
+export const getCatalogueSnapshot = cache(async (): Promise<CatalogueSnapshot> => {
+  const [categories, products] = await Promise.all([getCategories(), getProducts()]);
+  const details = await Promise.all(products.map((product) => getProduct(product.slug)));
+  const estimator = details
+    .filter((product): product is Product => Boolean(product?.estimatorOption.choices.length && product.tiers.length))
+    .map(toEstimatorProduct);
+  return { categories, products, estimator };
 });
 
 /**

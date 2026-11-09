@@ -3,6 +3,7 @@ import { QuoteForm } from "@/components/forms/QuoteForm";
 import { PageIntro } from "@/components/layout/PageIntro/PageIntro";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs/Breadcrumbs";
 import { CheckList } from "@/components/ui/CheckList/CheckList";
+import { getProducts } from "@/lib/catalogue";
 import styles from "../help/help.module.css";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ type Props = { searchParams: Promise<{ product?: string }> };
 
 /** SF-QUO-01 · Bulk quote request. */
 export default async function QuotePage({ searchParams }: Props) {
-  const { product } = await searchParams;
+  const [{ product }, products] = await Promise.all([searchParams, getProducts()]);
   return (
     <>
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Bulk & corporate quotes" }]} />
@@ -34,7 +35,7 @@ export default async function QuotePage({ searchParams }: Props) {
               ]}
             />
           </div>
-          <QuoteForm initialProduct={product} />
+          <QuoteForm products={products.map(({ slug, name }) => ({ slug, name }))} initialProduct={product} />
         </div>
       </div>
     </>

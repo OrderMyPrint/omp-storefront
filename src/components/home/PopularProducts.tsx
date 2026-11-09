@@ -4,16 +4,23 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "@/components/catalogue/ProductCard/ProductCard";
 import { SectionHeading } from "@/components/ui/SectionHeading/SectionHeading";
-import { getProduct, popularProductSlugs, type Product } from "@/data/catalogue";
+import { useCatalogue } from "@/components/catalogue/CatalogueProvider";
+import { popularProductSlugs } from "@/data/catalogue";
+import type { ListedProduct } from "@/lib/catalogue-map";
 import type { ProductCarouselBlock } from "@/lib/content";
 import styles from "./PopularProducts.module.css";
 
-const bySlugs = (slugs: string[]) =>
-  slugs.map((slug) => getProduct(slug)).filter((product): product is Product => Boolean(product));
+const bySlugs = (products: ListedProduct[], slugs: string[]) =>
+  slugs
+    .map((slug) => products.find((product) => product.slug === slug))
+    .filter((product): product is ListedProduct => Boolean(product));
 
 /** Figma SF-HOME-01 · Popular products — horizontal carousel with arrow controls. */
 export function PopularProducts({ block }: { block?: ProductCarouselBlock }) {
-  const popular = bySlugs(block?.productSlugs ?? popularProductSlugs);
+  const { products } = useCatalogue();
+  const chosen = bySlugs(products, block?.productSlugs ?? popularProductSlugs);
+  // Without an editor choice, a catalogue with none of the launch products still shows its products.
+  const popular = block || chosen.length ? chosen : products;
   const trackRef = useRef<HTMLUListElement>(null);
   const [canScroll, setCanScroll] = useState({ back: false, forward: true });
 

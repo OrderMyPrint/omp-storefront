@@ -1,6 +1,6 @@
 import "server-only";
-import { categories } from "@/data/catalogue";
 import { footerNav, routes, site, utilityNav } from "@/config/site";
+import { getCategories } from "@/lib/catalogue";
 import { getNavigation, getSiteSettings } from "@/lib/content";
 
 /** Everything the header, mobile menu and footer show — from the API, or the built-in defaults. */
@@ -16,9 +16,8 @@ export type SiteChrome = {
   source: "api" | "built-in";
 };
 
-const fallback: SiteChrome = {
+const fallback: Omit<SiteChrome, "categories"> = {
   utility: utilityNav,
-  categories: categories.map((c) => ({ label: c.name, href: routes.category(c.slug) })),
   quote: { label: "Get a bulk quote", href: routes.quote },
   footer: footerNav,
   contact: { phone: site.phone.display, phoneHref: site.phone.href, hours: site.hours },
@@ -28,7 +27,7 @@ const fallback: SiteChrome = {
 };
 
 export async function getSiteChrome(): Promise<SiteChrome> {
-  const [nav, settings] = await Promise.all([getNavigation(), getSiteSettings()]);
+  const [nav, settings, categories] = await Promise.all([getNavigation(), getSiteSettings(), getCategories()]);
   const link = (l: {
     label: string;
     href: string;
@@ -44,7 +43,9 @@ export async function getSiteChrome(): Promise<SiteChrome> {
   });
   return {
     utility: nav ? nav.utility.map(link) : fallback.utility,
-    categories: nav ? nav.categoryBar.categories.map((c) => ({ label: c.name, href: c.href })) : fallback.categories,
+    categories: nav
+      ? nav.categoryBar.categories.map((c) => ({ label: c.name, href: c.href }))
+      : categories.map((c) => ({ label: c.name, href: routes.category(c.slug) })),
     quote: nav ? (nav.categoryBar.quote ? link(nav.categoryBar.quote) : null) : fallback.quote,
     footer: nav ? nav.footer.map((c) => ({ title: c.title, links: c.links.map(link) })) : fallback.footer,
     contact: settings

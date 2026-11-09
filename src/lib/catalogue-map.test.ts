@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { getProduct } from "@/data/catalogue";
-import { toCategory, toListedProduct, toProduct, turnaroundText, type ApiProduct } from "@/lib/catalogue-map";
+import {
+  toCategory,
+  toEstimatorProduct,
+  toListedProduct,
+  toProduct,
+  turnaroundText,
+  type ApiProduct,
+} from "@/lib/catalogue-map";
 import { defaultConfiguration } from "@/lib/pricing";
 
 const option = (key: string, label: string, extra: Partial<ApiProduct["optionGroups"][0]["options"][0]> = {}) => ({
@@ -170,5 +177,40 @@ describe("listing and categories", () => {
 
   it("formats turnaround ranges", () => {
     expect(turnaroundText({ min: 2, max: 3 })).toBe("2–3");
+  });
+});
+
+describe("homepage estimator", () => {
+  it("uses the designed option group for launch products, with the API's prices", () => {
+    const withFabric: ApiProduct = {
+      ...tshirts,
+      optionGroups: [
+        ...tshirts.optionGroups,
+        {
+          key: "fabric",
+          label: "Fabric & GSM",
+          shortLabel: null,
+          hint: null,
+          note: null,
+          kind: "SELECT",
+          required: true,
+          defaults: ["cotton-180"],
+          options: [
+            option("cotton-180", "Cotton 180 GSM"),
+            option("poly-cotton-200", "Poly-cotton 200 GSM", { price: { perUnit: "35" } }),
+            option("dri-fit-160", "Dri-fit 160 GSM", { available: false }),
+          ],
+        },
+      ],
+    };
+    const estimator = toEstimatorProduct(toProduct(withFabric));
+    expect(estimator.estimatorOption).toEqual({
+      label: "Fabric",
+      choices: [
+        { id: "cotton-180", label: "Cotton 180 GSM", perUnit: 0 },
+        { id: "poly-cotton-200", label: "Poly-cotton 200 GSM", perUnit: 35 },
+      ],
+    });
+    expect(estimator.tiers[0]).toEqual({ quantity: 25, unitPrice: 349 });
   });
 });
