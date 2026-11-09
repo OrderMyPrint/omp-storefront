@@ -1,23 +1,24 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import { notFound } from "next/navigation";
 import { Clock, Receipt, Tag } from "lucide-react";
+import { CatalogueImage } from "@/components/catalogue/CatalogueImage";
 import { ProductBrowser } from "@/components/catalogue/ProductBrowser/ProductBrowser";
 import { PageIntro } from "@/components/layout/PageIntro/PageIntro";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs/Breadcrumbs";
 import { CtaBand } from "@/components/ui/CtaBand/CtaBand";
-import { categories, getCategory, productsInCategory } from "@/data/catalogue";
 import { routes } from "@/config/site";
+import { getCategories, getCategory, getProducts, redirectOrNotFound } from "@/lib/catalogue";
 import styles from "../../listing.module.css";
 
 type Params = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return categories.map((category) => ({ slug: category.slug }));
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  return (await getCategories()).map((category) => ({ slug: category.slug }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const category = getCategory((await params).slug);
+  const category = await getCategory((await params).slug);
   return category ? { title: category.name, description: category.lead } : {};
 }
 
@@ -31,14 +32,15 @@ function turnaroundRange(ranges: string[]): string {
 
 /** SF-CAT-01 · Category page (one template for all four categories). */
 export default async function CategoryPage({ params }: Params) {
-  const category = getCategory((await params).slug);
-  if (!category) notFound();
+  const { slug } = await params;
+  const category = await getCategory(slug);
+  if (!category) return redirectOrNotFound(`/category/${slug}`);
 
-  const items = productsInCategory(category.slug);
-  const cheapest = items.reduce(
-    (low, product) => (product.startingPrice < low.startingPrice ? product : low),
-    items[0],
-  );
+  const [allProducts, categories] = await Promise.all([getProducts(), getCategories()]);
+  const items = allProducts.filter((product) => product.category === category.slug);
+  const cheapest = items.length
+    ? items.reduce((low, product) => (product.startingPrice < low.startingPrice ? product : low))
+    : null;
 
   return (
     <>
@@ -53,14 +55,18 @@ export default async function CategoryPage({ params }: Params) {
         <section className={styles.hero}>
           <PageIntro overline="Category" title={category.name} lead={category.lead}>
             <ul className={styles.facts}>
-              <li className={`t-label-m ${styles.fact}`}>
-                <Tag size={20} aria-hidden="true" />
-                From {cheapest.fromPrice}
-              </li>
-              <li className={`t-label-m ${styles.fact}`}>
-                <Clock size={20} aria-hidden="true" />
-                Ready to ship in {turnaroundRange(items.map((product) => product.turnaround))} working days
-              </li>
+              {cheapest ? (
+                <>
+                  <li className={`t-label-m ${styles.fact}`}>
+                    <Tag size={20} aria-hidden="true" />
+                    From {cheapest.fromPrice}
+                  </li>
+                  <li className={`t-label-m ${styles.fact}`}>
+                    <Clock size={20} aria-hidden="true" />
+                    Ready to ship in {turnaroundRange(items.map((product) => product.turnaround))} working days
+                  </li>
+                </>
+              ) : null}
               <li className={`t-label-m ${styles.fact}`}>
                 <Receipt size={20} aria-hidden="true" />
                 GST invoice included
@@ -68,11 +74,11 @@ export default async function CategoryPage({ params }: Params) {
             </ul>
           </PageIntro>
           <div className={styles.heroImage}>
-            <Image src={category.image} alt="" fill priority sizes="(max-width: 1199px) 100vw, 640px" />
+            <CatalogueImage src={category.image} alt="" fill priority sizes="(max-width: 1199px) 100vw, 640px" />
           </div>
         </section>
 
-        <ProductBrowser initialCategory={category.slug} />
+        <ProductBrowser products={allProducts} categories={categories} initialCategory={category.slug} />
 
         <CtaBand
           title={category.bulkPrompt.title}

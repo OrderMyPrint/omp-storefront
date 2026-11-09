@@ -30,7 +30,7 @@ npm run dev                  # http://localhost:3000
 | Script           | What it does                                      |
 | ---------------- | ------------------------------------------------- |
 | `npm run dev`    | Development server                                |
-| `npm run build`  | Production build (all catalogue pages are static) |
+| `npm run build`  | Production build (catalogue pages are ISR, 60 s)  |
 | `npm start`      | Serve the production build                        |
 | `npm run check`  | Lint + type check + unit tests                    |
 | `npm test`       | Unit tests (pricing engine, INR formatting)       |
@@ -52,9 +52,10 @@ src/
     configurator/         Product configurator, tier table, artwork upload, product tabs
     cart/ forms/ help/    Cart view, form components, FAQ browser
   config/site.ts          Brand, phone, hours, routes and navigation
-  data/catalogue.ts       Categories, products, option steps and reference prices
+  data/catalogue.ts       Catalogue types + built-in fallback (used when the API is unreachable, and by the homepage)
   data/help.ts            FAQ, artwork rules and policy drafts
-  lib/                    pricing (estimate engine), cart (browser storage), format (₹), validation
+  lib/                    catalogue (live catalogue from the API + slug redirects), rules (constraint hints),
+                          pricing (estimate engine), cart (browser storage), format (₹), validation
   styles/                 Design tokens and text styles
 ```
 

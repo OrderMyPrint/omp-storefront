@@ -4,17 +4,8 @@ import { useMemo, useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { ProductCard } from "@/components/catalogue/ProductCard/ProductCard";
 import { Button } from "@/components/ui/Button/Button";
-import {
-  allMaterials,
-  allUses,
-  categories,
-  minimumQuantity,
-  products,
-  type CategorySlug,
-  type Material,
-  type Product,
-  type Use,
-} from "@/data/catalogue";
+import { allMaterials, allUses, type Category, type CategorySlug, type Material, type Use } from "@/data/catalogue";
+import type { ListedProduct } from "@/lib/catalogue-map";
 import styles from "./ProductBrowser.module.css";
 
 type QuantityBand = "any" | "under-100" | "100-500" | "500+";
@@ -27,7 +18,7 @@ const quantityBands: { id: QuantityBand; label: string; test: (min: number) => b
   { id: "500+", label: "500+", test: (min) => min > 500 },
 ];
 
-const sorters: Record<Sort, (a: Product, b: Product) => number> = {
+const sorters: Record<Sort, (a: ListedProduct, b: ListedProduct) => number> = {
   recommended: () => 0,
   "price-asc": (a, b) => a.startingPrice - b.startingPrice,
   "price-desc": (a, b) => b.startingPrice - a.startingPrice,
@@ -38,8 +29,22 @@ function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
 }
 
+/** The launch facet values in their designed order, then any new ones the catalogue uses. */
+function facets(known: string[], used: string[][]): string[] {
+  const extra = [...new Set(used.flat())].filter((value) => !known.includes(value)).sort();
+  return [...known, ...extra];
+}
+
 /** Figma SF-PLP-01 / SF-CAT-01 — filter sidebar, sort and product grid. */
-export function ProductBrowser({ initialCategory }: { initialCategory?: CategorySlug }) {
+export function ProductBrowser({
+  products,
+  categories,
+  initialCategory,
+}: {
+  products: ListedProduct[];
+  categories: Category[];
+  initialCategory?: CategorySlug;
+}) {
   const [cats, setCats] = useState<CategorySlug[]>(initialCategory ? [initialCategory] : []);
   const [uses, setUses] = useState<Use[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
@@ -49,6 +54,23 @@ export function ProductBrowser({ initialCategory }: { initialCategory?: Category
   const [sort, setSort] = useState<Sort>("recommended");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const useOptions: Use[] = useMemo(
+    () =>
+      facets(
+        allUses,
+        products.map((product) => product.uses),
+      ),
+    [products],
+  );
+  const materialOptions: Material[] = useMemo(
+    () =>
+      facets(
+        allMaterials,
+        products.map((product) => product.materials),
+      ),
+    [products],
+  );
+
   const results = useMemo(() => {
     const min = Number(minPrice) || 0;
     const max = Number(maxPrice) || Infinity;
@@ -57,10 +79,10 @@ export function ProductBrowser({ initialCategory }: { initialCategory?: Category
       .filter((product) => !cats.length || cats.includes(product.category))
       .filter((product) => !uses.length || product.uses.some((use) => uses.includes(use)))
       .filter((product) => !materials.length || product.materials.some((item) => materials.includes(item)))
-      .filter((product) => bandTest(minimumQuantity(product)))
+      .filter((product) => bandTest(product.minimumQuantity))
       .filter((product) => product.startingPrice >= min && product.startingPrice <= max)
       .sort(sorters[sort]);
-  }, [cats, uses, materials, band, minPrice, maxPrice, sort]);
+  }, [products, cats, uses, materials, band, minPrice, maxPrice, sort]);
 
   const clearAll = () => {
     setCats([]);
@@ -120,7 +142,7 @@ export function ProductBrowser({ initialCategory }: { initialCategory?: Category
 
         <fieldset className={styles.group}>
           <legend className="t-label-m">Use</legend>
-          {allUses.map((use) => (
+          {useOptions.map((use) => (
             <label key={use} className={`t-body-s ${styles.option}`}>
               <input type="checkbox" checked={uses.includes(use)} onChange={() => setUses(toggle(uses, use))} />
               {use}
@@ -130,7 +152,7 @@ export function ProductBrowser({ initialCategory }: { initialCategory?: Category
 
         <fieldset className={styles.group}>
           <legend className="t-label-m">Material</legend>
-          {allMaterials.map((item) => (
+          {materialOptions.map((item) => (
             <label key={item} className={`t-body-s ${styles.option}`}>
               <input
                 type="checkbox"

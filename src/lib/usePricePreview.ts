@@ -13,7 +13,11 @@ export type PreviewState =
 
 /** The request the API expects for a storefront configuration. */
 export function previewRequest(product: Product, config: Configuration): PricePreviewRequest {
-  const body: PricePreviewRequest = { productSlug: product.slug, selections: config.selections };
+  // Optional groups with nothing chosen are left out (the API rejects empty keys).
+  const selections = Object.fromEntries(
+    Object.entries(config.selections).filter(([, value]) => (Array.isArray(value) ? value.length : value)),
+  );
+  const body: PricePreviewRequest = { productSlug: product.slug, selections };
   if (product.quantity.kind === "sizes") body.sizes = config.sizes;
   else body.quantity = config.quantity;
   const colours: Record<string, number> = {};

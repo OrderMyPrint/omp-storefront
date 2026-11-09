@@ -4,15 +4,17 @@
  * Prices are the researched market reference rates shown in the approved
  * Figma design (docs repo: docs/prd/product-catalogue-and-pricing.md §5).
  * They are display data only — the business must confirm them (D-08) and the
- * CA must confirm GST (D-28). In Phase 3 the API's pricing engine becomes the
- * single source of truth and this file is replaced by API calls.
+ * CA must confirm GST (D-28). The catalogue pages now read the live catalogue
+ * from the API (src/lib/catalogue.ts); this file is the fallback used when the
+ * API is not configured or cannot be reached, and still feeds the homepage.
  *
  * Options without a researched price are either included at no extra cost
  * (sizes, garment styles, colours) or marked `unavailable` with the reason,
  * so the site never shows an invented price.
  */
 
-export type CategorySlug = "business-stationery" | "marketing-print" | "custom-transfers" | "corporate-merchandise";
+/** Category slugs come from the API, so any slug is possible (the four below are the launch set). */
+export type CategorySlug = string;
 
 export type Category = {
   slug: CategorySlug;
@@ -75,15 +77,29 @@ export type QuantityMode =
       defaults: Record<string, number>;
     };
 
-export type Use = "Branding & identity" | "Events & promotions" | "Packaging & labelling" | "Team & uniforms";
-export type Material = "Paper & card" | "Vinyl / film" | "Fabric";
+/** Filter facets. The launch values are listed in `allUses` / `allMaterials`; the API may add more. */
+export type Use = string;
+export type Material = string;
+
+/** Constraint rule between option groups (from the API): a UI hint only — the server enforces it. */
+export type OptionRule = {
+  whenGroup: string;
+  whenOption: string;
+  effect: "EXCLUDES" | "REQUIRES";
+  thenGroup: string;
+  thenOptions: string[];
+  message: string;
+};
 
 export type Product = {
   slug: string;
   name: string;
   category: CategorySlug;
+  /** Category display name (from the API); falls back to the built-in category list. */
+  categoryName?: string;
   summary: string;
   lead: string;
+  /** Image path or https URL; empty when the product has no image yet. */
   image: string;
   /** Display string used on product cards, e.g. "₹399" or "₹349/pc". */
   fromPrice: string;
@@ -102,6 +118,8 @@ export type Product = {
   materials: Material[];
   /** Main option shown in the homepage quick price estimator. */
   estimatorOption: { label: string; choices: Choice[] };
+  /** Constraint rules between option groups (API products only). */
+  rules?: OptionRule[];
 };
 
 export const categories: Category[] = [
@@ -825,6 +843,11 @@ export function getCategory(slug: string): Category | undefined {
 /** Category name in the overline style used on product cards. */
 export function categoryName(slug: CategorySlug): string {
   return getCategory(slug)?.name ?? "";
+}
+
+/** Card overline: the API's category name when present, else the built-in one. */
+export function productCategoryName(product: Pick<Product, "category" | "categoryName">): string {
+  return product.categoryName ?? categoryName(product.category);
 }
 
 export function productsInCategory(slug: CategorySlug): Product[] {

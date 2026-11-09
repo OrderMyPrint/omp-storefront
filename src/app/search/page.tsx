@@ -3,8 +3,9 @@ import { ProductCard } from "@/components/catalogue/ProductCard/ProductCard";
 import { PageIntro } from "@/components/layout/PageIntro/PageIntro";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs/Breadcrumbs";
 import { Button } from "@/components/ui/Button/Button";
-import { categoryName, products } from "@/data/catalogue";
 import { routes } from "@/config/site";
+import { getProducts } from "@/lib/catalogue";
+import type { ListedProduct } from "@/lib/catalogue-map";
 import listing from "../listing.module.css";
 import styles from "./page.module.css";
 
@@ -12,39 +13,37 @@ export const metadata: Metadata = { title: "Search", robots: { index: false } };
 
 type Props = { searchParams: Promise<{ q?: string }> };
 
-/** Simple ranked match on name, category, summary and options. */
-function search(query: string) {
+/**
+ * Search runs in the API (name, summary and description). The whole phrase is
+ * tried first; when it finds nothing, each word is searched and products that
+ * match more words rank higher. Products whose name matches come first.
+ */
+async function search(query: string): Promise<ListedProduct[]> {
   const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
   if (!terms.length) return [];
-  return products
-    .map((product) => {
-      const haystack = [
-        product.name,
-        categoryName(product.category),
-        product.summary,
-        product.description,
-        ...product.steps.flatMap((step) => step.choices.map((choice) => choice.label)),
-      ]
-        .join(" ")
-        .toLowerCase();
-      const name = product.name.toLowerCase();
-      const score = terms.reduce((sum, term) => {
-        const stem = term.replace(/s$/, "");
-        if (name.includes(stem)) return sum + 3;
-        if (haystack.includes(stem)) return sum + 1;
-        return sum;
-      }, 0);
-      return { product, score };
-    })
-    .filter((result) => result.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .map((result) => result.product);
+  let hits = (await getProducts(undefined, query)).map((product) => ({ product, words: terms.length }));
+  if (!hits.length && terms.length > 1) {
+    const perTerm = await Promise.all(terms.slice(0, 4).map((term) => getProducts(undefined, term.replace(/s$/, ""))));
+    const bySlug = new Map<string, { product: ListedProduct; words: number }>();
+    for (const product of perTerm.flat()) {
+      const hit = bySlug.get(product.slug) ?? { product, words: 0 };
+      hit.words += 1;
+      bySlug.set(product.slug, hit);
+    }
+    hits = [...bySlug.values()];
+  }
+  const nameScore = (product: ListedProduct) =>
+    terms.filter((term) => product.name.toLowerCase().includes(term.replace(/s$/, ""))).length;
+  return hits
+    .map((hit, index) => ({ ...hit, index, score: hit.words + 3 * nameScore(hit.product) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map((hit) => hit.product);
 }
 
 /** SF-SRCH-01 · Search results. */
 export default async function SearchPage({ searchParams }: Props) {
   const query = ((await searchParams).q ?? "").trim().slice(0, 100);
-  const results = search(query);
+  const results = await search(query);
 
   return (
     <>

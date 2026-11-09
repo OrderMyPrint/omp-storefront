@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { CatalogueImage } from "@/components/catalogue/CatalogueImage";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { ShoppingCart, Trash2 } from "lucide-react";
@@ -53,7 +53,7 @@ export function CartView() {
         {items.map((item) => (
           <li key={item.id} className={styles.item}>
             <div className={styles.thumb}>
-              <Image src={item.image} alt="" fill sizes="120px" />
+              <CatalogueImage src={item.image} alt="" fill sizes="120px" />
             </div>
             <div className={styles.detail}>
               <h2 className="t-h5">

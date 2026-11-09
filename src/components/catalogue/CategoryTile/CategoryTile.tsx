@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { CatalogueImage } from "@/components/catalogue/CatalogueImage";
 import { CmykBar } from "@/components/ui/CmykBar/CmykBar";
 import type { Category } from "@/data/catalogue";
 import { routes } from "@/config/site";
@@ -11,7 +11,12 @@ export function CategoryTile({ category }: { category: Category }) {
   return (
     <Link href={routes.category(category.slug)} className={styles.tile}>
       <div className={styles.media}>
-        <Image src={category.image} alt="" fill sizes="(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 300px" />
+        <CatalogueImage
+          src={category.image}
+          alt=""
+          fill
+          sizes="(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 300px"
+        />
       </div>
       <CmykBar />
       <div className={styles.body}>

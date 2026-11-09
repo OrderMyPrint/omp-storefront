@@ -1,38 +1,41 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Clock } from "lucide-react";
+import { CatalogueImage } from "@/components/catalogue/CatalogueImage";
 import { Configurator } from "@/components/configurator/Configurator";
 import { ProductTabs } from "@/components/configurator/ProductTabs";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs/Breadcrumbs";
-import { categoryName, getProduct, products } from "@/data/catalogue";
+import { productCategoryName } from "@/data/catalogue";
 import { routes } from "@/config/site";
 import { artworkRules } from "@/data/help";
+import { getProduct, getProducts, redirectOrNotFound } from "@/lib/catalogue";
 import styles from "./page.module.css";
 
 type Params = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return products.map((product) => ({ slug: product.slug }));
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  return (await getProducts()).map((product) => ({ slug: product.slug }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const product = getProduct((await params).slug);
+  const product = await getProduct((await params).slug);
   if (!product) return {};
   return {
     title: product.name,
     description: `${product.name} from ${product.fromPrice} excl. GST. ${product.summary}`,
-    openGraph: { images: [{ url: product.image }] },
+    ...(product.image ? { openGraph: { images: [{ url: product.image }] } } : {}),
   };
 }
 
 /** SF-PDP-01…07 · Product configurator page (one template for every product). */
 export default async function ProductPage({ params }: Params) {
-  const product = getProduct((await params).slug);
-  if (!product) notFound();
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  if (!product) return redirectOrNotFound(`/products/${slug}`);
 
-  const category = categoryName(product.category);
+  const category = productCategoryName(product);
 
   return (
     <>
@@ -46,7 +49,7 @@ export default async function ProductPage({ params }: Params) {
       <div className={`container ${styles.layout}`}>
         <div className={styles.media}>
           <div className={styles.photo}>
-            <Image
+            <CatalogueImage
               src={product.image}
               alt={`${product.name} printed by Order My Print`}
               fill
@@ -118,7 +121,9 @@ export default async function ProductPage({ params }: Params) {
                 label: "Artwork guide",
                 content: (
                   <div className={styles.guide}>
-                    <p className="t-body-m">Print area: {product.artwork.printArea}.</p>
+                    {product.artwork.printArea ? (
+                      <p className="t-body-m">Print area: {product.artwork.printArea}.</p>
+                    ) : null}
                     <ul className="t-body-m">
                       {artworkRules.map((rule) => (
                         <li key={rule.title}>

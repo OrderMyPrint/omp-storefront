@@ -17,6 +17,7 @@ import {
   priceConfiguration,
   type Configuration,
 } from "@/lib/pricing";
+import { blockedOptions, ruleErrors } from "@/lib/rules";
 import { usePricePreview } from "@/lib/usePricePreview";
 import { ArtworkUpload, type ArtworkState } from "./ArtworkUpload";
 import { TierTable } from "./TierTable";
@@ -33,6 +34,22 @@ function StepHeader({ number, title, hint, done }: { number: number; title: stri
         <p className="t-body-xs">{hint}</p>
       </div>
     </div>
+  );
+}
+
+/** Constraint errors for one option step, shown under its choices. */
+function StepErrors({ errors }: { errors: { code: string; field: string; message: string }[] }) {
+  if (!errors.length) return null;
+  return (
+    <Alert tone="error" title={errors[0].message}>
+      {errors.length > 1 ? (
+        <ul>
+          {errors.slice(1).map((error) => (
+            <li key={error.message}>{error.message}</li>
+          ))}
+        </ul>
+      ) : null}
+    </Alert>
   );
 }
 
@@ -73,13 +90,31 @@ export function Configurator({ product }: { product: Product }) {
         total: Number(server.total ?? 0),
       }
     : local;
-  const serverErrors = server && !server.valid ? server.errors : [];
+  const rules = useMemo(() => product.rules ?? [], [product]);
+  // Constraint rules are hints only: options that would break one are disabled with
+  // the rule's message, and the server's CONSTRAINT_VIOLATION errors are shown inline.
+  const blocked = useMemo(
+    () =>
+      blockedOptions(
+        rules,
+        config.selections,
+        product.steps.map((step) => ({
+          key: step.id,
+          multi: step.kind === "multi",
+          options: step.choices.map((choice) => choice.id),
+        })),
+      ),
+    [rules, config.selections, product.steps],
+  );
+  const serverErrors = server ? (server.valid ? [] : server.errors) : ruleErrors(rules, config.selections);
   const belowMinimum = server
     ? serverErrors.some((error) => error.code === "QUANTITY_BELOW_MINIMUM")
     : local.quantity < minimum;
   const needsQuote = server ? server.requiresQuote : local.quantity >= quoteFrom;
   const otherErrors = serverErrors.filter((error) => error.code !== "QUANTITY_BELOW_MINIMUM");
-  const blocked = belowMinimum || needsQuote || otherErrors.length > 0;
+  const cannotOrder = belowMinimum || needsQuote || otherErrors.length > 0;
+  const stepErrors = (stepId: string) =>
+    otherErrors.filter((error) => error.code === "CONSTRAINT_VIOLATION" && error.field === `selections.${stepId}`);
   const updating = preview.status === "loading";
   const missingArtwork = artwork.mode === "now" && product.artwork.slots.some((slot) => !artwork.files[slot]);
 
@@ -145,34 +180,38 @@ export function Configurator({ product }: { product: Product }) {
                 <legend id={`step-${step.id}`} className="visually-hidden">
                   {step.title}
                 </legend>
-                {step.choices.map((choice) => (
-                  <label
-                    key={choice.id}
-                    className={cx(
-                      styles.card,
-                      styles.checkCard,
-                      selected.includes(choice.id) && styles.selected,
-                      choice.unavailable && styles.unavailable,
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(choice.id)}
-                      disabled={Boolean(choice.unavailable)}
-                      onChange={() => toggleMulti(step, choice.id)}
-                    />
-                    <span className={styles.cardText}>
-                      <span className="t-label-l">{choice.label}</span>
-                      <span className="t-body-xs">
-                        {choice.unavailable ??
-                          [choice.detail, choice.perUnit ? `+ ₹${choice.perUnit} per ${noun}` : null]
-                            .filter(Boolean)
-                            .join(" · ")}
+                {step.choices.map((choice) => {
+                  const unavailable = choice.unavailable ?? blocked.get(`${step.id}:${choice.id}`);
+                  return (
+                    <label
+                      key={choice.id}
+                      className={cx(
+                        styles.card,
+                        styles.checkCard,
+                        selected.includes(choice.id) && styles.selected,
+                        unavailable && styles.unavailable,
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(choice.id)}
+                        disabled={Boolean(unavailable)}
+                        onChange={() => toggleMulti(step, choice.id)}
+                      />
+                      <span className={styles.cardText}>
+                        <span className="t-label-l">{choice.label}</span>
+                        <span className="t-body-xs">
+                          {unavailable ??
+                            [choice.detail, choice.perUnit ? `+ ₹${choice.perUnit} per ${noun}` : null]
+                              .filter(Boolean)
+                              .join(" · ")}
+                        </span>
                       </span>
-                    </span>
-                  </label>
-                ))}
+                    </label>
+                  );
+                })}
               </fieldset>
+              <StepErrors errors={stepErrors(step.id)} />
               {showColours && step.coloursPerChoice ? (
                 <div className={styles.colourCounts}>
                   {step.choices
@@ -232,13 +271,19 @@ export function Configurator({ product }: { product: Product }) {
               </legend>
               {step.choices.map((choice) => {
                 const isSelected = selectedId === choice.id;
+                const unavailable = choice.unavailable ?? blocked.get(`${step.id}:${choice.id}`);
                 if (step.kind === "swatch") {
                   return (
-                    <label key={choice.id} className={cx(styles.swatch, isSelected && styles.swatchSelected)}>
+                    <label
+                      key={choice.id}
+                      className={cx(styles.swatch, isSelected && styles.swatchSelected)}
+                      title={unavailable}
+                    >
                       <input
                         type="radio"
                         name={`${product.slug}-${step.id}`}
                         checked={isSelected}
+                        disabled={Boolean(unavailable)}
                         onChange={() => selectChoice(step, choice.id)}
                         className="visually-hidden"
                       />
@@ -250,25 +295,26 @@ export function Configurator({ product }: { product: Product }) {
                 return (
                   <label
                     key={choice.id}
-                    className={cx(styles.card, isSelected && styles.selected, choice.unavailable && styles.unavailable)}
+                    className={cx(styles.card, isSelected && styles.selected, unavailable && styles.unavailable)}
                   >
                     <input
                       type="radio"
                       name={`${product.slug}-${step.id}`}
                       checked={isSelected}
-                      disabled={Boolean(choice.unavailable)}
+                      disabled={Boolean(unavailable)}
                       onChange={() => selectChoice(step, choice.id)}
                       className="visually-hidden"
                     />
                     <span className={styles.cardText}>
                       <span className="t-label-l">{choice.label}</span>
-                      <span className="t-body-xs">{choice.unavailable ?? priceHint(choice, noun)}</span>
+                      <span className="t-body-xs">{unavailable ?? priceHint(choice, noun)}</span>
                     </span>
                     {isSelected ? <Check size={20} aria-hidden="true" className={styles.tick} /> : null}
                   </label>
                 );
               })}
             </fieldset>
+            <StepErrors errors={stepErrors(step.id)} />
           </section>
         );
       })}
@@ -310,8 +356,10 @@ export function Configurator({ product }: { product: Product }) {
               <strong className="t-h5">{formatQuantity(price.quantity)} pcs</strong>
             </div>
             <p className="t-body-xs">
-              {product.quantity.surchargeSizes[0]} and above: + {formatINR(product.quantity.surcharge, { decimals: 0 })}{" "}
-              per piece · minimum {minimum} pieces
+              {product.quantity.surchargeSizes.length && product.quantity.surcharge
+                ? `${product.quantity.surchargeSizes[0]} and above: + ${formatINR(product.quantity.surcharge, { decimals: 0 })} per piece · `
+                : null}
+              minimum {minimum} pieces
             </p>
           </div>
         ) : (
@@ -411,7 +459,7 @@ export function Configurator({ product }: { product: Product }) {
         <div className={styles.totalRow}>
           <span className="t-h5">{server ? "Total" : "Estimated total"}</span>
           <span className={cx("t-price-l", updating && styles.updating)} aria-live="polite">
-            {blocked ? "—" : formatINR(price.total)}
+            {cannotOrder ? "—" : formatINR(price.total)}
           </span>
         </div>
         <p className="t-body-xs">
@@ -432,7 +480,13 @@ export function Configurator({ product }: { product: Product }) {
             </Button>
           ) : (
             <>
-              <Button variant="accent" icon={ShoppingCart} onClick={handleAdd} disabled={blocked || updating} fullWidth>
+              <Button
+                variant="accent"
+                icon={ShoppingCart}
+                onClick={handleAdd}
+                disabled={cannotOrder || updating}
+                fullWidth
+              >
                 Add to cart
               </Button>
               <Button href={`${routes.quote}?product=${product.slug}`} variant="secondary" fullWidth>
@@ -463,7 +517,7 @@ export function Configurator({ product }: { product: Product }) {
       <div className={styles.stickyBar}>
         <div>
           <p className="t-body-xs">{server ? "Total" : "Estimated total"}</p>
-          <p className="t-price-m">{blocked ? "—" : formatINR(price.total)}</p>
+          <p className="t-price-m">{cannotOrder ? "—" : formatINR(price.total)}</p>
         </div>
         <Button href="#price-title" variant="accent">
           Review price
