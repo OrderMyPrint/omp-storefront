@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { Alert } from "@/components/ui/Alert/Alert";
 import { Button } from "@/components/ui/Button/Button";
 import { Select } from "@/components/ui/Field/Select";
 import { TextArea, TextField } from "@/components/ui/Field/TextField";
 import { PreLaunchNotice } from "@/components/ui/PreLaunchNotice/PreLaunchNotice";
+import { API_URL } from "@/lib/api";
 import { digitsOnly, isEmail, isIndianMobile } from "@/lib/validation";
 import styles from "./forms.module.css";
 
@@ -38,6 +40,46 @@ export function QuoteForm({
   });
   const [errors, setErrors] = useState<Errors>({});
   const [submitted, setSubmitted] = useState(false);
+  /** Result of sending the request to the API (omp-api, POST /quotes/requests). */
+  const [sent, setSent] = useState<{ state: "idle" | "sending" | "done" | "failed"; text?: string }>({
+    state: "idle",
+  });
+
+  const send = async () => {
+    setSent({ state: "sending" });
+    try {
+      const res = await fetch(`${API_URL}/api/v1/quotes/requests`, {
+        method: "POST",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        signal: AbortSignal.timeout(15000),
+        body: JSON.stringify({
+          contact: { name: contact.name.trim(), phone: contact.mobile, email: contact.email.trim() },
+          ...(contact.company.trim() ? { companyName: contact.company.trim() } : {}),
+          ...(contact.gstin ? { gstin: contact.gstin } : {}),
+          items: items.map((item) => ({
+            productSlug: item.product,
+            quantity: Number(item.quantity),
+            ...(item.notes.trim() ? { notes: item.notes.trim() } : {}),
+          })),
+          ...(contact.needBy ? { needBy: contact.needBy } : {}),
+          ...(contact.notes.trim() ? { notes: contact.notes.trim() } : {}),
+        }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { number: string };
+        setSent({ state: "done", text: data.number });
+      } else
+        setSent({
+          state: "failed",
+          text:
+            res.status === 429
+              ? "Too many requests just now. Please try again in a minute."
+              : "We couldn’t send your request. Please check the details and try again.",
+        });
+    } catch {
+      setSent({ state: "failed", text: "We couldn’t reach the server. Please check your connection and try again." });
+    }
+  };
 
   const setItem = (key: number, patch: Partial<Item>) =>
     setItems((current) => current.map((item) => (item.key === key ? { ...item, ...patch } : item)));
@@ -63,7 +105,9 @@ export function QuoteForm({
           next[`qty-${item.key}`] = Number(item.quantity) > 0 ? undefined : "Enter a quantity.";
         });
         setErrors(next);
-        setSubmitted(Object.values(next).every((value) => !value));
+        const valid = Object.values(next).every((value) => !value);
+        setSubmitted(valid);
+        if (valid && API_URL && sent.state !== "sending") void send();
       }}
     >
       <h2 className="t-h4">What do you need?</h2>
@@ -180,10 +224,22 @@ export function QuoteForm({
         onChange={(e) => setField("notes", e.target.value)}
         hint="Delivery city, branding details, split deliveries — you can share artwork once we reply."
       />
-      <Button type="submit" variant="primary">
-        Request quotation
-      </Button>
-      {submitted ? <PreLaunchNotice action="quotation requests" /> : null}
+      {sent.state === "done" ? (
+        <Alert tone="success" title={`Request received — reference ${sent.text}`}>
+          Our team will review it and reply on the mobile number or email you gave. Keep the reference for any
+          follow-up.
+        </Alert>
+      ) : (
+        <Button type="submit" variant="primary" disabled={sent.state === "sending"}>
+          {sent.state === "sending" ? "Sending…" : "Request quotation"}
+        </Button>
+      )}
+      {sent.state === "failed" ? (
+        <Alert tone="error" title="Not sent">
+          {sent.text}
+        </Alert>
+      ) : null}
+      {submitted && !API_URL ? <PreLaunchNotice action="quotation requests" /> : null}
     </form>
   );
 }
